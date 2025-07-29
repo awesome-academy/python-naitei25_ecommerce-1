@@ -10,6 +10,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.contrib.auth.models import AbstractUser
 from userauths.models import User
 from . import constants as C
+from cloudinary.models import CloudinaryField
 
 # Create your models here.
 def user_directory_path(instance, filename):
@@ -30,7 +31,7 @@ class Address(models.Model):
         return f"{self.user} - {self.address}"
  
 class Image(models.Model):
-    url = models.URLField(max_length=500)
+    url = CloudinaryField('image')
     alt_text = models.CharField(max_length=C.MAX_LENGTH_TEXT , null=True, blank=True)
     object_type = models.CharField(max_length=C.MAX_LENGTH_OBJECT_TYPE, choices=C.OBJECT_TYPE_CHOICES )  # e.g., 'Product', 'Category', 'Vendor'
     object_id = models.CharField(max_length=C.MAX_LENGTH_OBJECT_ID)    # e.g., pid, cid, vid
@@ -78,10 +79,46 @@ class Vendor(models.Model):
 
     def __str__(self):
         return f"{self.title} (ID: {self.vid})"
+    
+    @property
+    def image_set(self):
+        """Get all images for this vendor"""
+        from .models import Image
+        return Image.objects.filter(object_type='vendor', object_id=self.vid)
+    
+    @property
+    def banner_set(self):
+        """Get all banner images for this vendor"""
+        from .models import Image
+        return Image.objects.filter(object_type='vendor_banner', object_id=self.vid)
+    
+    @property
+    def primary_banner_url(self):
+        """Get primary banner image URL"""
+        img = Image.objects.filter(object_type='vendor_banner', object_id=self.vid, is_primary=True).first()
+        if img:
+            try:
+                return img.url.url  # CloudinaryField returns a CloudinaryResource object
+            except Exception as e:
+                print(f"Error getting banner URL for vendor {self.vid}: {e}")
+                return None
+        return None
+    
     class Meta:
-        db_table = 'vendor'
+        db_table = 'core_vendor'
         verbose_name = "Vendor"
         verbose_name_plural = "Vendors"
+    
+    @property
+    def primary_image_url(self):
+        img = Image.objects.filter(object_type='vendor', object_id=self.vid, is_primary=True).first()
+        if img:
+            try:
+                return img.url.url  # CloudinaryField returns a CloudinaryResource object
+            except Exception as e:
+                print(f"Error getting image URL for vendor {self.vid}: {e}")
+                return None
+        return None
 
 class Coupon(models.Model):
     vendor = models.ForeignKey(Vendor, on_delete=models.CASCADE)
@@ -130,6 +167,12 @@ class Category(models.Model):
         if self.parent:
             return f"{self.parent.title} ➝ {self.title}"
         return self.title
+    
+    @property
+    def image_set(self):
+        """Get all images for this category"""
+        from .models import Image
+        return Image.objects.filter(object_type='category', object_id=self.cid)
 
     class Meta:
         db_table = 'category'
@@ -168,14 +211,26 @@ class Product(models.Model):
     updated = models.DateTimeField(auto_now=True)
     rating_avg = models.FloatField(default=0.0)
 
+    def __repr__(self):
+        return f"{self.title} (ID: {self.pid})"
+    
+    @property
+    def image_set(self):
+        """Get all images for this product"""
+        from .models import Image
+        return Image.objects.filter(object_type='product', object_id=self.pid)
+    
+    def get_precentage(self):
+        """Calculate discount percentage"""
+        if self.old_price and self.old_price > 0:
+            return ((self.old_price - self.amount) / self.old_price) * 100
+        return 0
+    
     class Meta:
         db_table = 'product'
         verbose_name = "Product"
         verbose_name_plural = "Products"
         ordering = ['-date']
-
-    def __repr__(self):
-        return f"<Product {self.title}>"
 
 class ProductReview(models.Model):
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)

@@ -50,6 +50,7 @@ OBJECT_TYPE_CHOICES = (
     ('product', 'Product'),
     ('category', 'Category'),
     ('vendor', 'Vendor'),
+    ('vendor_banner', 'Vendor_Banner'),
 )
 
 ORDER_STATUS_CHOICES = (
