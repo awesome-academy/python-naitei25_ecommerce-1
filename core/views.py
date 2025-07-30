@@ -30,7 +30,6 @@ def payment_completed_view(request):
         'created_date': '2024-01-15',
         'payment_method': 'Credit Card'
     }
-    
     context = {
         "order": sample_order,
     }
@@ -38,3 +37,9 @@ def payment_completed_view(request):
 
 def payment_failed_view(request):
     return render(request, 'core/payment-failed.html')
+
+def search_view(request):
+    return render(request, "core/search.html")
+
+def product_detail_view(request, pid):
+    return render(request, "core/product-detail.html")
