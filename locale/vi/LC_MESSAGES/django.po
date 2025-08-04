@@ -1,0 +1,662 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-08-03 23:47+0700\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+#: .\templates\core\async\cart-list.html:10 .\templates\core\cart.html:9
+#: .\templates\partials\base.html:214 .\templates\partials\base.html:355
+msgid "Home"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:11 .\templates\core\cart.html:10
+#: .\templates\partials\base.html:226 .\templates\partials\base.html:358
+msgid "Shop"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:12 .\templates\core\cart.html:11
+#: .\templates\partials\base.html:147
+msgid "Cart"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:19 .\templates\core\cart.html:18
+msgid "Your Cart"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:22 .\templates\core\cart.html:20
+#, python-format
+msgid ""
+"There are <span class=\"text-brand\">%(totalcartitems)s</span> products in "
+"your cart"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:37 .\templates\core\cart.html:34
+msgid "Product"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:38 .\templates\core\cart.html:35
+msgid "Title"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:39 .\templates\core\cart.html:36
+msgid "Unit Price"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:40 .\templates\core\cart.html:37
+msgid "Quantity"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:41
+#: .\templates\core\async\cart-list.html:65
+#: .\templates\core\async\cart-list.html:87 .\templates\core\cart.html:38
+#: .\templates\core\cart.html:88
+msgid "Subtotal"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:42
+#: .\templates\core\async\cart-list.html:68 .\templates\core\cart.html:39
+msgid "Refresh"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:43
+#: .\templates\core\async\cart-list.html:71 .\templates\core\cart.html:40
+msgid "Remove"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:57
+msgid "Price"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:60
+msgid "Stock"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:62 .\templates\core\cart.html:59
+msgid "Qty"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:100 .\templates\core\cart.html:101
+msgid "Shipping"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:103 .\templates\core\cart.html:104
+msgid "Free"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:108 .\templates\core\cart.html:109
+msgid "Total"
+msgstr ""
+
+#: .\templates\core\async\cart-list.html:118 .\templates\core\cart.html:119
+msgid "Proceed To Checkout"
+msgstr ""
+
+#: .\templates\partials\base.html:9
+msgid "E-commerce - Multipurpose eCommerce HTML Template"
+msgstr ""
+
+#: .\templates\partials\base.html:43
+msgid "Grand opening,"
+msgstr ""
+
+#: .\templates\partials\base.html:43
+#, python-format
+msgid "up to 15%%"
+msgstr ""
+
+#: .\templates\partials\base.html:43
+msgid "off all items. Only"
+msgstr ""
+
+#: .\templates\partials\base.html:43
+msgid "3 days"
+msgstr ""
+
+#: .\templates\partials\base.html:43
+msgid "left"
+msgstr ""
+
+#: .\templates\partials\base.html:51 .\templates\partials\base.html:276
+#: .\templates\partials\base.html:366 .\templates\partials\base.html:548
+msgid "About Us"
+msgstr ""
+
+#: .\templates\partials\base.html:52 .\templates\partials\base.html:163
+#: .\templates\partials\base.html:368
+msgid "My Account"
+msgstr ""
+
+#: .\templates\partials\base.html:53 .\templates\partials\base.html:140
+msgid "Wishlist"
+msgstr ""
+
+#: .\templates\partials\base.html:54
+msgid "Order Tracking"
+msgstr ""
+
+#: .\templates\partials\base.html:62
+#, python-format
+msgid "100%% Secure delivery without contacting the courier"
+msgstr ""
+
+#: .\templates\partials\base.html:63
+msgid "Super Value Deals - Save more with coupons"
+msgstr ""
+
+#: .\templates\partials\base.html:64
+#, python-format
+msgid "Trendy silver jewelry, save up 35%% off today"
+msgstr ""
+
+#: .\templates\partials\base.html:72
+msgid "Need help? Call Us:"
+msgstr ""
+
+#: .\templates\partials\base.html:74
+msgid "English"
+msgstr ""
+
+#: .\templates\partials\base.html:77
+msgid "Français"
+msgstr ""
+
+#: .\templates\partials\base.html:80
+msgid "Deutsch"
+msgstr ""
+
+#: .\templates\partials\base.html:83
+msgid "Русский"
+msgstr ""
+
+#: .\templates\partials\base.html:117 .\templates\partials\base.html:186
+msgid "All Categories"
+msgstr ""
+
+#: .\templates\partials\base.html:118
+msgid "Milks and Dairies"
+msgstr ""
+
+#: .\templates\partials\base.html:119
+msgid "Wines & Alcohol"
+msgstr ""
+
+#: .\templates\partials\base.html:120
+msgid "Clothing & Beauty"
+msgstr ""
+
+#: .\templates\partials\base.html:121
+msgid "Pet Foods & Toy"
+msgstr ""
+
+#: .\templates\partials\base.html:122
+msgid "Fast food"
+msgstr ""
+
+#: .\templates\partials\base.html:123
+msgid "Baking material"
+msgstr ""
+
+#: .\templates\partials\base.html:124
+msgid "Vegetables"
+msgstr ""
+
+#: .\templates\partials\base.html:125
+msgid "Fresh Seafood"
+msgstr ""
+
+#: .\templates\partials\base.html:126
+msgid "Noodles & Rice"
+msgstr ""
+
+#: .\templates\partials\base.html:127
+msgid "Ice cream"
+msgstr ""
+
+#: .\templates\partials\base.html:129
+msgid "Search for items..."
+msgstr ""
+
+#: .\templates\partials\base.html:151 .\templates\partials\base.html:318
+msgid "View cart"
+msgstr ""
+
+#: .\templates\partials\base.html:160 .\templates\partials\base.html:558
+msgid "Account"
+msgstr ""
+
+#: .\templates\partials\base.html:164
+msgid "Admin Dashboard"
+msgstr ""
+
+#: .\templates\partials\base.html:165 .\templates\partials\base.html:562
+msgid "My Wishlist"
+msgstr ""
+
+#: .\templates\partials\base.html:166
+msgid "Setting"
+msgstr ""
+
+#: .\templates\partials\base.html:167 .\templates\partials\base.html:560
+msgid "Sign In"
+msgstr ""
+
+#: .\templates\partials\base.html:186
+msgid "Browse"
+msgstr ""
+
+#: .\templates\partials\base.html:193 .\templates\partials\base.html:219
+msgid "Electronics"
+msgstr ""
+
+#: .\templates\partials\base.html:196 .\templates\partials\base.html:220
+msgid "Fashion"
+msgstr ""
+
+#: .\templates\partials\base.html:199 .\templates\partials\base.html:221
+msgid "Home & Garden"
+msgstr ""
+
+#: .\templates\partials\base.html:202 .\templates\partials\base.html:222
+msgid "Sports"
+msgstr ""
+
+#: .\templates\partials\base.html:206
+msgid "Show more..."
+msgstr ""
+
+#: .\templates\partials\base.html:212
+msgid "Deals"
+msgstr ""
+
+#: .\templates\partials\base.html:217
+msgid "Category"
+msgstr ""
+
+#: .\templates\partials\base.html:229 .\templates\partials\base.html:361
+msgid "Vendors"
+msgstr ""
+
+#: .\templates\partials\base.html:232
+msgid "Mega menu"
+msgstr ""
+
+#: .\templates\partials\base.html:235
+msgid "Fruit & Vegetables"
+msgstr ""
+
+#: .\templates\partials\base.html:237
+msgid "Meat & Poultry"
+msgstr ""
+
+#: .\templates\partials\base.html:238
+msgid "Fresh Vegetables"
+msgstr ""
+
+#: .\templates\partials\base.html:239
+msgid "Herbs & Seasonings"
+msgstr ""
+
+#: .\templates\partials\base.html:243
+msgid "Breakfast & Dairy"
+msgstr ""
+
+#: .\templates\partials\base.html:245 .\templates\partials\base.html:584
+msgid "Milk & Flavoured Milk"
+msgstr ""
+
+#: .\templates\partials\base.html:246 .\templates\partials\base.html:585
+msgid "Butter and Margarine"
+msgstr ""
+
+#: .\templates\partials\base.html:247 .\templates\partials\base.html:586
+msgid "Eggs Substitutes"
+msgstr ""
+
+#: .\templates\partials\base.html:254
+msgid "Hot deals"
+msgstr ""
+
+#: .\templates\partials\base.html:255
+msgid "Don't miss"
+msgstr ""
+
+#: .\templates\partials\base.html:255
+msgid "Trending"
+msgstr ""
+
+#: .\templates\partials\base.html:257
+#, python-format
+msgid "Save to 50%%"
+msgstr ""
+
+#: .\templates\partials\base.html:260
+msgid "Shop now"
+msgstr ""
+
+#: .\templates\partials\base.html:264
+msgid "off"
+msgstr ""
+
+#: .\templates\partials\base.html:271
+msgid "Blog"
+msgstr ""
+
+#: .\templates\partials\base.html:274 .\templates\partials\base.html:364
+msgid "Pages"
+msgstr ""
+
+#: .\templates\partials\base.html:277 .\templates\partials\base.html:285
+#: .\templates\partials\base.html:367
+msgid "Contact"
+msgstr ""
+
+#: .\templates\partials\base.html:278
+msgid "My Dashboard"
+msgstr ""
+
+#: .\templates\partials\base.html:279
+msgid "Purchase Guide"
+msgstr ""
+
+#: .\templates\partials\base.html:280 .\templates\partials\base.html:550
+msgid "Privacy Policy"
+msgstr ""
+
+#: .\templates\partials\base.html:281
+msgid "Terms of Service"
+msgstr ""
+
+#: .\templates\partials\base.html:293 .\templates\partials\base.html:612
+msgid "24/7 Support Center"
+msgstr ""
+
+#: .\templates\partials\base.html:346
+msgid "Search for items…"
+msgstr ""
+
+#: .\templates\partials\base.html:369
+msgid "Login"
+msgstr ""
+
+#: .\templates\partials\base.html:370
+msgid "Register"
+msgstr ""
+
+#: .\templates\partials\base.html:379
+msgid "Our location"
+msgstr ""
+
+#: .\templates\partials\base.html:382
+msgid "Log In / Sign Up"
+msgstr ""
+
+#: .\templates\partials\base.html:389 .\templates\partials\base.html:617
+msgid "Follow Us"
+msgstr ""
+
+#: .\templates\partials\base.html:394
+msgid ""
+"Copyright 2019 - Present © Desphixs. All rights reserved. Powered by "
+"Desphixs."
+msgstr ""
+
+#: .\templates\partials\base.html:407
+msgid "Welcome to E-commerce Store"
+msgstr ""
+
+#: .\templates\partials\base.html:408
+msgid ""
+"This is a simplified version of the e-commerce template. All dynamic content "
+"and Django URL tags have been removed to make it work as a standalone HTML "
+"file."
+msgstr ""
+
+#: .\templates\partials\base.html:413
+msgid "Featured Products"
+msgstr ""
+
+#: .\templates\partials\base.html:414
+msgid "Browse our featured products collection."
+msgstr ""
+
+#: .\templates\partials\base.html:419
+msgid "Best Sellers"
+msgstr ""
+
+#: .\templates\partials\base.html:420
+msgid "Check out our best selling items."
+msgstr ""
+
+#: .\templates\partials\base.html:425
+msgid "New Arrivals"
+msgstr ""
+
+#: .\templates\partials\base.html:426
+msgid "Discover the latest products in our store."
+msgstr ""
+
+#: .\templates\partials\base.html:431
+msgid "Special Offers"
+msgstr ""
+
+#: .\templates\partials\base.html:432
+msgid "Don't miss our special deals and discounts."
+msgstr ""
+
+#: .\templates\partials\base.html:451
+msgid "Stay home & get your daily"
+msgstr ""
+
+#: .\templates\partials\base.html:451
+msgid "needs from our shop"
+msgstr ""
+
+#: .\templates\partials\base.html:453
+msgid "Start Your Daily Shopping with"
+msgstr ""
+
+#: .\templates\partials\base.html:453
+msgid "E-commerce Mart"
+msgstr ""
+
+#: .\templates\partials\base.html:455
+msgid "Your email address"
+msgstr ""
+
+#: .\templates\partials\base.html:456
+msgid "Subscribe"
+msgstr ""
+
+#: .\templates\partials\base.html:475
+msgid "Best prices & offers"
+msgstr ""
+
+#: .\templates\partials\base.html:476
+msgid "Orders $50 or more"
+msgstr ""
+
+#: .\templates\partials\base.html:486
+msgid "Free delivery"
+msgstr ""
+
+#: .\templates\partials\base.html:487
+msgid "24/7 amazing services"
+msgstr ""
+
+#: .\templates\partials\base.html:497
+msgid "Great daily deal"
+msgstr ""
+
+#: .\templates\partials\base.html:498
+msgid "When you sign up"
+msgstr ""
+
+#: .\templates\partials\base.html:508
+msgid "Wide assortment"
+msgstr ""
+
+#: .\templates\partials\base.html:509
+msgid "Mega Discounts"
+msgstr ""
+
+#: .\templates\partials\base.html:519
+msgid "Easy returns"
+msgstr ""
+
+#: .\templates\partials\base.html:520
+msgid "Within 30 days"
+msgstr ""
+
+#: .\templates\partials\base.html:535
+msgid "Awesome grocery store website template"
+msgstr ""
+
+#: .\templates\partials\base.html:538
+msgid "Address:"
+msgstr ""
+
+#: .\templates\partials\base.html:538
+msgid "5171 W Campbell Ave undefined Kent, Utah 53127 United States"
+msgstr ""
+
+#: .\templates\partials\base.html:539
+msgid "Call Us:"
+msgstr ""
+
+#: .\templates\partials\base.html:540
+msgid "Email:"
+msgstr ""
+
+#: .\templates\partials\base.html:541
+msgid "Hours:"
+msgstr ""
+
+#: .\templates\partials\base.html:541
+msgid "10:00 - 18:00, Mon - Sat"
+msgstr ""
+
+#: .\templates\partials\base.html:546
+msgid "Company"
+msgstr ""
+
+#: .\templates\partials\base.html:549
+msgid "Delivery Information"
+msgstr ""
+
+#: .\templates\partials\base.html:551
+msgid "Terms & Conditions"
+msgstr ""
+
+#: .\templates\partials\base.html:552
+msgid "Contact Us"
+msgstr ""
+
+#: .\templates\partials\base.html:553
+msgid "Support Center"
+msgstr ""
+
+#: .\templates\partials\base.html:554
+msgid "Careers"
+msgstr ""
+
+#: .\templates\partials\base.html:561
+msgid "View Cart"
+msgstr ""
+
+#: .\templates\partials\base.html:563
+msgid "Track My Order"
+msgstr ""
+
+#: .\templates\partials\base.html:564
+msgid "Help Ticket"
+msgstr ""
+
+#: .\templates\partials\base.html:565
+msgid "Shipping Details"
+msgstr ""
+
+#: .\templates\partials\base.html:566
+msgid "Compare products"
+msgstr ""
+
+#: .\templates\partials\base.html:570
+msgid "Corporate"
+msgstr ""
+
+#: .\templates\partials\base.html:572
+msgid "Become a Vendor"
+msgstr ""
+
+#: .\templates\partials\base.html:573
+msgid "Affiliate Program"
+msgstr ""
+
+#: .\templates\partials\base.html:574
+msgid "Farm Business"
+msgstr ""
+
+#: .\templates\partials\base.html:575
+msgid "Farm Careers"
+msgstr ""
+
+#: .\templates\partials\base.html:576
+msgid "Our Suppliers"
+msgstr ""
+
+#: .\templates\partials\base.html:577
+msgid "Accessibility"
+msgstr ""
+
+#: .\templates\partials\base.html:578
+msgid "Promotions"
+msgstr ""
+
+#: .\templates\partials\base.html:582
+msgid "Popular"
+msgstr ""
+
+#: .\templates\partials\base.html:587
+msgid "Marmalades"
+msgstr ""
+
+#: .\templates\partials\base.html:588
+msgid "Sour Cream and Dips"
+msgstr ""
+
+#: .\templates\partials\base.html:589
+msgid "Tea & Kombucha"
+msgstr ""
+
+#: .\templates\partials\base.html:590
+msgid "Cheese"
+msgstr ""
+
+#: .\templates\partials\base.html:603
+msgid "&copy; 2022, Nest - HTML Ecommerce Template"
+msgstr ""
+
+#: .\templates\partials\base.html:603
+msgid "All rights reserved"
+msgstr ""
+
+#: .\templates\partials\base.html:608
+msgid "Working 8:00 - 22:00"
+msgstr ""
+
+#: .\templates\partials\base.html:624
+#, python-format
+msgid "Up to 15%% discount on your first subscribe"
+msgstr ""

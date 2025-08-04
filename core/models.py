@@ -5,7 +5,6 @@ from django.conf import settings
 from taggit.managers import TaggableManager
 from django_ckeditor_5.fields import CKEditor5Field
 from django.utils import timezone
-from django.contrib.auth.models import AbstractUser
 from userauths.models import User
 # Create your models here.
 STATUS_CHOICE = (
@@ -41,7 +40,7 @@ def user_directory_path(instance, filename):
 
 
 class Address(models.Model):
-    user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     mobile = models.CharField(max_length=300, null=True)
     address = models.CharField(max_length=100, null=True)
     status = models.BooleanField(default=False)
@@ -50,7 +49,7 @@ class Address(models.Model):
         verbose_name_plural = "Address"
 
 class Image(models.Model):
-    url = models.ImageField(upload_to='images/')
+    url = models.URLField(max_length=500)
     alt_text = models.CharField(max_length=255, null=True, blank=True)
     object_type = models.CharField(max_length=50)  # e.g., 'Product', 'Category', 'Vendor'
     object_id = models.CharField(max_length=50)    # e.g., pid, cid, vid
