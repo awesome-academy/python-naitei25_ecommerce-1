@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="{% static 'assets/css/plugins/slider-range.css' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
     <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
@@ -134,20 +135,21 @@
                                     <span><span class="lable">{% trans "Wishlist" %}</span></span>
                                 </div>
                                 <div class="header-action-icon-2">
-                                    <span class="mini-cart-icon">
-                                        <img alt="E-commerce" src="{% static 'assets/imgs/theme/icons/icon-cart.svg' %}" />
-                                        <span class="pro-count blue cart-items-count">0</span>
-                                    </span>
-                                    <span><span class="lable">{% trans "Cart" %}</span></span>
-                                    <div class="cart-dropdown-wrap cart-dropdown-hm2">
-                                        <div class="shopping-cart-footer">
-                                            <div class="shopping-cart-button">
-                                                <span class="outline">{% trans "View cart" %}</span>
-                                                <a href="{% url 'core:checkout' %}" class="outline">{% trans "View cart" %}</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                  <a class="mini-cart-icon" href="{% url 'core:cart' %}">
+                                      <img alt="E-commerce" src="{% static 'assets/imgs/theme/icons/icon-cart.svg' %}" />
+                                      <span class="pro-count blue cart-items-count">{{ request.session.cart_data_obj|length }}</span>
+                                  </a>
+                                  <a href="{% url 'core:cart' %}"><span class="lable">Cart</span></a>
+                                  <div class="cart-dropdown-wrap cart-dropdown-hm2">
+
+                                      <div class="shopping-cart-footer">
+
+                                          <div class="shopping-cart-button">
+                                              <a href="{% url 'core:cart' %}" class="outline">View cart</a>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
                                 <div class="header-action-icon-2">
                                     <span>
                                         <img class="svgInject" alt="E-commerce" src="{% static 'assets/imgs/theme/icons/icon-user.svg' %}" />
@@ -214,7 +216,14 @@
                                         <a href="{% url 'core:index' %}" class="active">{% trans "Home" %}</a>
                                     </li>
                                     <li>
-                                        <a href="{% url 'core:category-list' %}">{% trans "Category" %}</a>
+                                        <a href="{% url 'core:category-list' %}">{% trans "Category" %} <i class="fi-rs-angle-down"></i></a>
+                                        <ul class="sub-menu">
+                                            {% for c in categories %}
+                                            <li><a href="{% url 'core:category-product-list' c.cid %}">{{c.title}}</a></li>
+                                            {% endfor %}
+                                            <hr>
+                                            <li><a href="{% url 'core:category-list' %}">{% trans "All Categories" %}</a></li>
+                                        </ul>
                                     </li>
                                     <li>
                                         <a href="{% url 'core:product-list' %}">{% trans "Shop" %}</a>
@@ -655,6 +664,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
     <script type="text/javascript" src="{% static 'assets/js/product_detail_slider.js' %}"></script>
     {% block extra_js %}{% endblock extra_js %}
-    
+
 </body>
 </html>

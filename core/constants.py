@@ -97,3 +97,6 @@ AUTHENTIC_RATING =5.0
 MIN=0
 SHIP_ON_TIME =100
 TAG_LIMIT = 6
+DEFAULT_CATEGORY_IMAGE = "https://hoseiki.vn/wp-content/uploads/2025/03/avatar-mac-dinh-4.jpg"
+DEFAULT_PRODUCT_IMAGE = '/static/images/default-product.png'
+PRODUCT_STATUS_PUBLISHED = "published"

@@ -7,6 +7,9 @@ from django_ckeditor_5.fields import CKEditor5Field
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
 from cloudinary.models import CloudinaryField
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
+
 from django.contrib.auth.models import AbstractUser
 from userauths.models import User
 from . import constants as C
@@ -233,6 +236,9 @@ class Product(models.Model):
         verbose_name = "Product"
         verbose_name_plural = "Products"
         ordering = ['-date']
+    def __repr__(self):
+        return f"<Product {self.title}>"
+
 
     def __repr__(self):
         return f"<Product {self.title}>"

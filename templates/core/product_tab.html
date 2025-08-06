@@ -1,7 +1,8 @@
 {% load i18n %}
+{% load static %}
 <div class="tab-pane fade {% if active %}show active{% endif %}" id="{{ tab_id }}" role="tabpanel">
   <div class="row product-grid-4">
-    {% for p in products %}
+    {% for p in product %}
     <div class="col-lg-1-5 col-md-4 col-12 col-sm-6">
       <div class="product-cart-wrap mb-30">
         <div class="product-img-action-wrap">
@@ -31,23 +32,27 @@
           </div>
           <div class="product-card-bottom">
             <div class="product-price">
-              <span>$</span> <span class="current-product-price-{{ p.pid }}">{{ p.amount }}</span>
+              <span>$</span> <span class="current-product-price-{{ p.pid }}" >{{ p.amount }}</span>
               <span class="old-price">${{ p.old_price }}</span>
             </div>
             <div class="add-cart">
-              <input type="hidden" value="1" class="product-quantity-{{ p.pid }}">
+              <input type="hidden" value="1" id="product-quantity-{{ p.pid }}" class="product-quantity-{{ p.pid }}">
               <input type="hidden" class="product-pid-{{ p.pid }}" value="{{ p.pid }}">
-              <input type="hidden" class="product-image-{{ p.pid }}" value="{{ p.get_primary_image.url }}">
+              <input type="hidden" class="product-image-{{ p.pid }}" value="{{ p.primary_image_url }}">
+              <input type="hidden" class="product-id-{{ p.pid }}" value="{{ p.pid }}">
               <input type="hidden" class="product-title-{{ p.pid }}" value="{{ p.title }}">
               <div class="d-flex">
-                <button class="add add-to-cart-btn" data-index="{{ p.pid }}" style="border: none;" id="add-to-cart-btn">
-                  <i class="fi-rs-shopping-cart mr-5"></i>{% trans "Add" %}
+                <button class="add add-to-cart-btn"
+                  data-index="{{ p.pid }}"
+                  data-tab="{{ tab_id }}"
+                  data-price="{{ p.amount }}"
+                  style="border: none;">
+                  <i class="fi-rs-shopping-cart mr-5"></i>Add
                 </button>
-                <button style="border: none; background: none;" class="add-to-wishlist" data-product-item="{{ p.pid }}">
-                  <i class="fi-rs-heart" style="fill: aqua;"></i>
-                </button>
+
+                  <button style="border: none; background: none;" class="add-to-wishlist" data-product-item="{{p.id}}"><i class="fi-rs-heart" style="fill: aqua;"></i></button>
               </div>
-            </div>
+          </div>
           </div>
         </div>
       </div>
@@ -57,3 +62,4 @@
     {% endfor %}
   </div>
 </div>
+<script src="{% static 'assets/js/function2.js' %}"></script>

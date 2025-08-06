@@ -1,10 +1,12 @@
 from django.contrib import admin
+from cloudinary.models import CloudinaryField
+from core.models import Category, Product, Vendor, CartOrder, CartOrderProducts, ProductReview, Address, Image
+from django.contrib import admin
 from .models import (
     Address, Image, Vendor, Coupon, CouponUser,
     Category, Product, ProductReview, ReturnRequest,
     CartOrder, CartOrderProducts
 )
-
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
     list_display = ('user', 'address', 'mobile', 'status')
@@ -79,3 +81,5 @@ class CartOrderAdmin(admin.ModelAdmin):
 class CartOrderProductsAdmin(admin.ModelAdmin):
     list_display = ('order', 'item', 'qty', 'price', 'total')
     search_fields = ('order__user__username', 'item')
+# Register your models here.
+
