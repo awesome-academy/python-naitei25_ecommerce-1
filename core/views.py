@@ -6,7 +6,6 @@ from django.http import JsonResponse
 from .models import Product
 from django.template.loader import render_to_string
 from django.db.models import Avg
-from core.models import ProductReview
 from django.shortcuts import get_object_or_404
 from core.models import *
 from core.models import Image
@@ -21,8 +20,12 @@ from core.models import Coupon, Product, Category, Vendor, CartOrder, CartOrderP
 from taggit.models import Tag
 from core.constants import *
 from django.contrib.auth.decorators import login_required
+from decimal import Decimal
 from django.shortcuts import render
-from .models import Product, Image
+from django.utils import timezone
+from django.utils.translation import gettext as _
+
+from django.db import transaction
 
 def index(request):
     # Base query: các sản phẩm đã publish
@@ -70,7 +73,6 @@ def index(request):
 def cart_view(request):
     cart_total_amount = 0
     cart_items = {}
-
     if 'cart_data_obj' in request.session:
         for p_id, item in request.session['cart_data_obj'].items():
             try:
@@ -85,14 +87,36 @@ def cart_view(request):
             item['subtotal'] = subtotal
             cart_items[p_id] = item
             cart_total_amount += subtotal
+        first_product_id = next(iter(cart_items))
+        try:
+          product = Product.objects.get(pid=first_product_id)
+          vendor = product.vendor
+        except Product.DoesNotExist:
+          messages.warning(request, _("One or more products are no longer available."))
+          return redirect("core:index")
+
+        product = Product.objects.get(pid=first_product_id)
+        vendor = product.vendor
+        order, created = CartOrder.objects.get_or_create(
+            user=request.user,
+            paid_status=False,
+            defaults={
+                "vendor": vendor,
+                "amount": Decimal(cart_total_amount)
+            }
+        )
+        if not created:
+            order.amount = Decimal(cart_total_amount)
+            order.save()
 
         return render(request, "core/cart.html", {
             "cart_data": cart_items,
             'totalcartitems': len(cart_items),
-            'cart_total_amount': cart_total_amount
+            'cart_total_amount': cart_total_amount,
+            'order': order
         })
     else:
-        messages.warning(request, "Your cart is empty")
+        messages.warning(request, _("Your cart is empty"))
         return redirect("core:index")
 
 def add_to_cart(request):
@@ -204,9 +228,97 @@ def customer_dashboard(request):
 
 def search_view(request):
     return render(request, "core/search.html")
+def apply_coupon_to_order(request, order, code, subtotal):
+    """
+    Xử lý logic áp dụng coupon cho một order.
+    """
+    code = code.strip()
+    try:
+        coupon = Coupon.objects.get(code__iexact=code, active=True)
 
-def checkout(request):
-    context = {}
+        # Hết hạn
+        if coupon.expiry_date < timezone.now():
+            messages.warning(request, _("Coupon has expired."))
+        elif subtotal < coupon.min_order_amount:
+            messages.warning(
+                request,
+                _("Minimum order amount should be $%(amount)s") % {"amount": coupon.min_order_amount}
+            )
+        elif order.coupon == coupon and coupon.apply_once_per_user:
+            messages.warning(request, _("You have already applied this coupon."))
+        else:
+            order.coupon = coupon
+            order.save()
+            messages.success(
+                request,
+                _("Coupon '%(code)s' applied successfully.") % {"code": coupon.code}
+            )
+    except Coupon.DoesNotExist:
+        messages.error(request, _("Invalid coupon code."))
+
+def checkout(request, oid):
+    order = get_object_or_404(CartOrder, id=oid, user=request.user)
+    with transaction.atomic():
+      if order.coupon:
+        order.coupon = None
+        order.save()
+        messages.info(request,_("Cart changed. Coupon has been removed."))
+      # Xóa toàn bộ sản phẩm cũ của order (nếu có)
+      CartOrderProducts.objects.filter(order=order).delete()
+
+      # Tạo lại CartOrderProducts từ session
+      cart = request.session.get('cart_data_obj', {})
+      for pid, item in cart.items():
+          try:
+              product = Product.objects.get(pid=pid)
+              qty = int(item.get('qty', 1))
+              price = Decimal(str(item.get('price', 0)))
+              CartOrderProducts.objects.create(
+                  order=order,
+                  item=product.title,
+                  image=product.primary_image_url,
+                  qty=qty,
+                  price=price,
+                  total=qty * price
+              )
+          except Product.DoesNotExist:
+              messages.warning(request,("Some products in your cart are no longer available and have been removed."))
+              continue
+
+      # Tính toán giá
+      order_items = CartOrderProducts.objects.filter(order=order)
+      subtotal = sum([i.total for i in order_items])
+      tax = Decimal('0')
+      shipping = Decimal('0')
+      discount = Decimal('0')
+      total = subtotal
+
+      # Xử lý áp dụng coupon
+      if request.method == "POST" and "apply_coupon" in request.POST:
+          code = request.POST.get("code", "").strip()
+          try:
+              coupon = Coupon.objects.get(code__iexact=code, active=True)
+              apply_coupon_to_order(request, order, code, subtotal)
+          except Coupon.DoesNotExist:
+              messages.error(request,  _("Invalid coupon code."))
+
+      # Tính lại tổng nếu có coupon
+      if order.coupon:
+          coupon = order.coupon
+          discount = subtotal * Decimal(str(coupon.discount)) / Decimal('100')
+          if discount > coupon.max_discount_amount:
+              discount = coupon.max_discount_amount
+          total = subtotal - discount + tax + shipping
+
+    context = {
+      "order": order,
+      "order_items": order_items,
+      "subtotal": subtotal,
+      "tax": tax,
+      "shipping": shipping,
+      "discount": discount,
+      "total": total,
+    }
     return render(request, "core/checkout.html", context)
 
 def payment_completed_view(request):
@@ -266,7 +378,6 @@ def category_product_list_view(request, cid):
 
     }
     return render(request, "core/category-product-list.html", context)
-
 
 def product_detail_view(request, pid):
     #product = Product.objects.get(pid = pid)
