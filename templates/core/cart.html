@@ -55,7 +55,9 @@
                     </div>
 
                     {% if totalcartitems %}
-                    <a href="{% url 'core:checkout' %}" class="btn mb-20 w-100">{% trans "Proceed To CheckOut" %}<i class="fi-rs-sign-out ml-15"></i></a>
+                    <a href="{% url 'core:checkout' order.id %}" class="btn mb-20 w-100">
+                      {% trans "Proceed To CheckOut" %}<i class="fi-rs-sign-out ml-15"></i>
+                    </a>
                     {% endif %}
                 </div>
             </div>
