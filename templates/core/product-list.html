@@ -9,6 +9,7 @@
       <link rel="stylesheet" href="{% static 'assets/css/slider.css' %}">
       <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
     {% endblock %}
+    
     <main class="main">
         <div class="page-header breadcrumb-wrap">
             <div class="container">
@@ -38,7 +39,7 @@
                                             <li>
                                                 <input data-filter="category" class="form-check-input filter-checkbox" type="checkbox" name="checkbox" id="exampleCheckbox2" value="{{ c.cid }}" />
                                                 &nbsp;&nbsp;
-                                                <a href="{% url 'core:category-product-list' c.cid %}"> <img src="{{c.image.url}}" alt="" />{{ c.title }}</a>
+                                                <a href="{% url 'core:category-product-list' c.cid %}"> <img src="{{c.primary_image_url}}" alt="" />{{ c.title }}</a>
                                             </li>
                                             {% endfor %}
                                         </ul>
@@ -51,8 +52,9 @@
                                     <div class="d-flex">
                                         <div class="customeee-checkbox mr-80">
                                             {% for v in vendors %}
-                                            <input class="form-check-input filter-checkbox" data-filter="vendor" type="checkbox" name="checkbox" id="exampleCheckbox1" value="{{ v.id }}" />
-                                            <label class="form-check-label" for="exampleCheckbox1"><span>{{v.title}}</span></label>
+                                            <input class="form-check-input filter-checkbox" data-filter="vendor" type="checkbox" name="checkbox" id="exampleCheckbox1" value="{{ v.vid }}" />
+                                                &nbsp;&nbsp;
+                                                <a href="{% url 'core:vendor-detail' v.vid %}"> <img src="{{v.primary_image_url}}" alt="" />{{ v.title }}</a>
                                             <br /><br />
                                             {% endfor %}
                                         </div>
@@ -66,31 +68,30 @@
                                         <div class="price-filter mb-20">
                                           <div class="price-filter-inner">
                                             <div id="slidder-range" class="mb-20"></div>
-
                                             <input type="range"
                                                    name="price_range"
-                                                   value="{{ min_max_price.price__min|price_format }}"
+                                                   value="{{ min_max_price.amount__min|price_format }}"
                                                    class="slider-range"
                                                    id="range"
-                                                   min="{{ min_max_price.price__min }}"
-                                                   max="{{ min_max_price.price__max }}"
+                                                   min="{{ min_max_price.amount__min }}"
+                                                   max="{{ min_max_price.amount__max }}"
                                                    oninput="max_price.value=this.value; slider_range_value2.textContent = '$' + parseFloat(this.value).toFixed(2);">
 
                                             <div class="d-flex justify-content-between">
                                                 <div class="caption">
-                                                    {% trans "From:" %} <strong id="slider-range-value1" class="text-brand">${{ min_max_price.price__min|price_format }}</strong>
+                                                    {% trans "From:" %} <strong id="slider-range-value1" class="text-brand">${{ min_max_price.amount__min|price_format }}</strong>
                                                 </div>
                                                 <div class="caption">
-                                                    {% trans "To:" %} <strong id="slider-range-value2" class="text-brand">${{ min_max_price.price__max|price_format }}</strong>
+                                                    {% trans "To:" %} <strong id="slider-range-value2" class="text-brand">${{ min_max_price.amount__max|price_format }}</strong>
                                                 </div>
                                             </div>
 
                                             <input type="number"
                                                    name="price_input"
-                                                   value="{{ min_max_price.price__min|price_format }}"
+                                                   value="{{ min_max_price.amount__min|price_format }}"
                                                    id="max_price"
-                                                   min="{{ min_max_price.price__min }}"
-                                                   max="{{ min_max_price.price__max }}"
+                                                   min="{{ min_max_price.amount__min }}"
+                                                   max="{{ min_max_price.amount__max }}"
                                                    placeholder="Current Price"
                                                    onkeyup="range.value=this.value; slider_range_value2.textContent = '$' + parseFloat(this.value).toFixed(2);">
                                         </div>
@@ -159,8 +160,8 @@
                                 <div class="product-img-action-wrap">
                                     <div class="product-img product-img-zoom">
                                         <a href="{% url 'core:product-detail' p.pid %}">
-                                          <img src="{{ p.primary_image_url }}" class="default-img" alt="{{ p.title }}" />
-                                          <img src="{{ p.primary_image_url }}" class="hover-img" alt="{{ p.title }}" />
+                                          <img src="{{ p.primary_image_url }}" class="default-img product-thumbnail" alt="{{ p.title }}" />
+                                          <img src="{{ p.primary_image_url }}" class="hover-img product-thumbnail" alt="{{ p.title }}" />
                                         </a>
                                     </div>
                                     <div class="product-action-1">
@@ -174,16 +175,16 @@
                                 </div>
                                 <div class="product-content-wrap">
                                     <div class="product-category">
-                                        <a href="{% url 'core:product-detail' p.pid %}">{{ p.category.title }}</a>
+                                        <a href="{% url 'core:category-product-list' p.category.cid %}">{{ p.category.title }}</a>
                                     </div>
-                                    <h2><a href="shop-product-right.html">{{ p.title }}</a></h2>
+                                    <h2><a href="{% url 'core:product-detail' p.pid %}">{{ p.title }}</a></h2>
                                     <div class="product-rate-cover">
                                         <i class="fas fa-star text-warning"></i>
                                         <span class="font-small ml-5 text-muted"> ({{ p.reviews.all.count }})</span>
 
                                     </div>
                                     <div>
-                                        <span class="font-small text-muted">{% trans "By"%} <a href="#">{{p.vendor.title}}</a></span>
+                                        <span class="font-small text-muted">{% trans "By"%} <a href="{% url 'core:vendor-detail' p.vendor.vid %}">{{p.vendor.title}}</a></span>
                                     </div>
                                     <div class="product-card-bottom">
                                         <div class="product-price">

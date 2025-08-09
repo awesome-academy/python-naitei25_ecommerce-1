@@ -17,7 +17,6 @@
     <!-- Template CSS -->
     <link rel="stylesheet" href="{% static 'assets/css/plugins/slider-range.css' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
@@ -158,7 +157,7 @@
                                     <div class="cart-dropdown-wrap cart-dropdown-hm2 account-dropdown">
                                         <ul>
                                             <li><a href="{% url 'core:dashboard' %}"><i class="fi fi-rs-user mr-10"></i>{% trans "My Account" %}</a></li>
-                                            <li><a href="{% url 'useradmin:dashboard' %}"><i class="fi fi-rs-user mr-10"></i>{% trans "Admin Dashboard" %}</a></li>
+                                            <li><a href="{% url 'core:dashboard' %}"><i class="fi fi-rs-user mr-10"></i>{% trans "Admin Dashboard" %}</a></li>
                                             <li><span><i class="fi fi-rs-heart mr-10"></i>{% trans "My Wishlist" %}</span></li>
                                             <li><span><i class="fi fi-rs-settings-sliders mr-10"></i>{% trans "Setting" %}</span></li>
 

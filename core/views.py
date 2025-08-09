@@ -418,3 +418,35 @@ def search_view(request):
         "page_obj": page_obj,
     }
     return render(request, "core/search.html", context)
+def filter_product(request):
+    # 1. Lấy tất cả sản phẩm làm nền tảng
+    products = Product.objects.filter(product_status="published")
+
+    # 2. An toàn lấy các tham số. Dùng .get() để tránh lỗi
+    categories = request.GET.getlist("category[]")
+    vendors = request.GET.getlist("vendor[]")
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
+    # 3. Áp dụng các bộ lọc một cách tích lũy (chỉ khi có giá trị)
+    
+    # Lọc theo giá nếu có giá trị min và max
+    if min_price and max_price:
+        # Lọc các sản phẩm có giá trong khoảng [min_price, max_price]
+        products = products.filter(amount__gte=min_price, amount__lte=max_price)
+
+    # Lọc theo category nếu có category được chọn
+    if len(categories) > 0:
+        products = products.filter(category_id__in=categories)
+
+    # Lọc theo vendor nếu có vendor được chọn
+    if len(vendors) > 0:
+        products = products.filter(vendor_id__in=vendors)
+    
+    # 4. Áp dụng distinct và order_by ở cuối cùng
+    # distinct() đảm bảo mỗi sản phẩm chỉ xuất hiện một lần
+    products = products.distinct().order_by("-pid")
+
+    # 5. Render và trả về JSON
+    data = render_to_string("core/async/product-list.html", {"products": products})
+    return JsonResponse({"data": data, "count": products.count()})
