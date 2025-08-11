@@ -1,0 +1,149 @@
+{% extends 'useradmin/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load i18n %}
+{{ form.media }}
+{% block content %}   
+<head>
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+</head>
+<section class="content-main">
+    <form method="POST" enctype="multipart/form-data">
+        <div class="row">
+            <div class="col-9">
+                <div class="content-header">
+                    <h2 class="content-title">{% trans "Update Product" %}</h2>
+                    <div>
+                        <button class="btn btn-md rounded font-sm hover-up">{% trans "Publish" %} <i class="fas fa-check-circle ms-2"></i></button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>{% trans "Basic" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        {% if form.errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ form.errors }}</strong>
+                        </div>
+                        {% endif %}
+                        
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="product_name" class="form-label">{% trans "Product title" %}</label>
+                            {{form.title}}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Full description" %}</label>
+                            {{form.description}}
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">{% trans "Selling price" %}</label>
+                                    <div class="row gx-2">
+                                        {{form.amount}}
+                                    </div>
+                                    {% if form.amount.value %}
+                                    <small class="text-muted">{% trans "Current" %}: ${{form.amount.value|floatformat:2}}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">{% trans "Old price" %}</label>
+                                    {{form.old_price}}
+                                    {% if form.old_price.value %}
+                                    <small class="text-muted">{% trans "Current" %}: ${{form.old_price.value|floatformat:2}}</small>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <label class="form-label">{% trans "Currency" %}</label>
+                                <select class="form-select">
+                                    <option>USD</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Type" %}</label>
+                            {{form.type}}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Stock" %}</label>
+                            {{form.stock_count}}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Life of Product" %}</label>
+                            {{form.life}}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Manufactured Date" %}</label>
+                            {{form.mfd}}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Tags" %}</label>
+                            {{form.tags}}
+                            <small class="text-muted">{% trans "Separate tag using comma" %}</small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Digital Product" %}</label>
+                            <br>
+                            {{form.digital}}
+                            <small class="text-muted ms-2">{% trans "Check if only this is a digital product" %}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3">
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>{% trans "Media" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="input-upload">
+                            {% if primary_image %}
+                                <img src="{{ primary_image.image.url }}" alt="{{ primary_image.alt_text }}" 
+                                     class="product-upload-preview" />
+                            {% else %}
+                                <img src="{% static 'images/default-product.png' %}" alt="{% trans 'No image' %}" 
+                                     class="product-upload-preview" />
+                            {% endif %}
+                            <div class="mt-3">
+                                {{ form.image }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h4>{% trans "Others" %}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row gx-2">
+                            <div class="col-sm-6 mb-3">
+                                <label class="form-label">{% trans "Category" %}</label>
+                                {{form.category}}
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                </div>
+                <button class="btn mt-3 btn-md rounded font-sm hover-up" type="submit">{% trans "Update Product" %}</button>
+            </div>
+        </div>
+    </form>
+</section>
+{% endblock content %}

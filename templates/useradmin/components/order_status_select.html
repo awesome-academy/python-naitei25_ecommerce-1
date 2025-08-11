@@ -1,0 +1,11 @@
+{% load i18n %}
+<form method="POST" action="{% url 'useradmin:change_order_status' order.id %}" class="col-lg-6 col-md-6 ms-auto text-md-end">
+    {% csrf_token %}
+    <select name="status" class="form-select d-inline-block mb-lg-0 mr-5 mw-200">
+        <option value="">{% trans "Change Order Status" %}</option>
+        {% for value, label in status_choices %}
+            <option value="{{ value }}" {% if order.order_status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+    <button class="btn btn-primary" type="submit">{% trans "Save" %}</button>
+</form>

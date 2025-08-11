@@ -1,0 +1,30 @@
+{% load i18n %}
+{% load custom_filters %}
+
+<div class="col-md-4">
+    <article class="icontext align-items-start">
+        <span class="icon icon-sm rounded-circle bg-primary-light">
+            <i class="text-primary material-icons {{ icon }}"></i>
+        </span>
+        <div class="text">
+            <h6 class="mb-1">{{ title|translate_field_name }}</h6>
+            <p class="mb-1">
+                {% if title == "Customer" %}
+                    {{ order.full_name|display_field:"Name"|safe }} <br />
+                    {{ order.email|display_field:"Email"|safe }} <br />
+                    {{ order.phone|display_field:"Phone"|safe }} <br />
+                {% elif title == "Order info" %}
+                    {{ order.shipping_method|default:"Standard"|display_field:"Shipping Method"|safe }} <br />
+                    {{ order.id|display_field:"Order Id"|safe }} <br />
+                    {{ order.order_status|display_field:"Order Status"|safe }} <br />
+                    {{ order.paid_status|yesno:"Paid,Not Paid"|display_field:"Payment Status"|safe }} <br />
+                {% elif title == "Deliver to" %}
+                    {{ order.address|display_field:"Address"|safe }} <br />
+                    {{ order.city|display_field:"City"|safe }} <br />
+                    {{ order.state|display_field:"State"|safe }} <br />
+                    {{ order.country|display_field:"Country"|safe }} <br />
+                {% endif %}
+            </p>
+        </div>
+    </article>
+</div>

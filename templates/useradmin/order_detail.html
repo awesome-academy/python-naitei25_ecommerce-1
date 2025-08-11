@@ -1,0 +1,63 @@
+{% extends 'useradmin/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load i18n %}
+{% load order_tags %}
+{% load custom_filters %}
+{% block content %}  
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">{% trans "Order detail" %}</h2>
+            <p>{% trans "Details for Order ID" %}: #{{ order.id }}</p>
+        </div>
+    </div>
+    <div class="card">
+        <header class="card-header">
+            <div class="row align-items-center">
+                <div class="col-lg-6 col-md-6 mb-lg-0 mb-15">
+                    <span> <i class="material-icons md-calendar_today"></i> <b>{{order.order_date|date:"M d, Y"}}</b> </span> <br />
+                    <small class="text-muted">{% trans "Order ID" %}: #{{order.id}}</small>
+                </div>
+                
+                {% order_status_select order %}
+                
+            </div>
+        </header>
+        <div class="card-body">
+            <div class="row mb-50 mt-20 order-info-wrap">
+                {% order_info_card "md-person" "Customer" %}
+                {% order_info_card "md-local_shipping" "Order info" %}
+                {% order_info_card "md-place" "Deliver to" %}
+            </div>
+            
+            <!-- Phần table items -->
+            <div class="row">
+                <div class="col-lg-12">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th width="40%">{% trans "Product" %}</th>
+                                    <th width="20%">{% trans "Unit Price" %}</th>
+                                    <th width="20%">{% trans "Quantity" %}</th>
+                                    <th width="20%" class="text-end">{% trans "Total" %}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order_items %}
+                                    {% order_item_row item %}
+                                {% endfor %}
+                                
+                                {% order_summary order %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

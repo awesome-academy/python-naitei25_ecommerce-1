@@ -1,0 +1,14 @@
+{% load i18n %}
+<tr>
+    <td>
+        <a class="itemside" href="#">
+            <div class="left">
+                <img src="{{ item.image }}" class="order-item-img" alt="{% trans 'Item' %}" />
+            </div>
+            <div class="info">{{ item.item }}</div>
+        </a>
+    </td>
+    <td>${{ item.price|floatformat:2 }}</td>
+    <td>{{ item.qty }}</td>
+    <td class="text-end">${{ item.total|floatformat:2 }}</td>
+</tr>

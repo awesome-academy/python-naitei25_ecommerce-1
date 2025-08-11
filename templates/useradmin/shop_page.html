@@ -1,0 +1,95 @@
+{% extends 'useradmin/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load i18n %}
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <a href="javascript:history.back()"><i class="material-icons md-arrow_back"></i> {% trans "Go back" %} </a>
+    </div>
+    <div class="card mb-4">
+        <div class="card-header bg-brand-2 shop-header-bg"></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-xl col-lg flex-grow-0" style="flex-basis: 230px;">
+                    <div class="img-thumbnail shadow w-100 bg-white position-relative text-center shop-profile-img-container">
+                        {% if request.user.profile.image %}
+                            <img src="{{ request.user.profile.image.url }}" class="center-xy img-fluid" alt="{% trans 'Profile Image' %}" />
+                        {% else %}
+                            <img src="https://www.testhouse.net/wp-content/uploads/2021/11/default-avatar.jpg" class="center-xy img-fluid" alt="{% trans 'Default Avatar' %}" />
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-xl col-lg">
+                    <h3>{{request.user.profile.full_name|default:request.user.username}}</h3>
+                    <p class="mt-0 mb-0">{{request.user.email}}</p>
+                    <p class="mt-0 mb-0">{{request.user.profile.bio|default:"N/A"}}</p>
+                </div>
+            </div>
+            <!-- card-body.// -->
+            <hr class="my-4" />
+            <div class="row g-4">
+                <div class="col-md-12 col-lg-4 col-xl-2">
+                    <article class="box">
+                        <p class="mb-0 text-muted">{% trans "Total sales" %}:</p>
+                        <h5 class="text-success">{{ total_sales.qty|default:"0" }}</h5>
+                        <p class="mb-0 text-muted">{% trans "Revenue" %}:</p>
+                        <h5 class="text-success mb-0">${{revenue.price|default:"0.00"|floatformat:2}}</h5>
+                    </article>
+                </div>
+                <!--  col.// -->
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <h6>{% trans "Bio Data" %}</h6>
+                    <p>
+                        {{request.user.profile.full_name|default:request.user.username}} <br />
+                        {{request.user.email}} <br />
+                        {{request.user.profile.phone|default:"N/A"}}
+                    </p>
+                </div>
+                <div class="col-sm-6 col-lg-4 col-xl-3">
+                    <h6>{% trans "Address & Location" %}</h6>
+                    <p>
+                        {% trans "Address" %}: {{request.user.profile.address|default:"N/A"}} <br />
+                        {% trans "Country" %}: {{request.user.profile.country|default:"N/A"}} <br />
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <h3 class="card-title">{% trans "Products by seller" %}</h3>
+            <div class="row">
+                {% for p in products %}
+                    <div class="col-xl-2 col-lg-3 col-md-6">
+                        <div class="card card-product-grid">
+                            <a href="#" class="img-wrap">
+                                {% if p.primary_image_url %}
+                                    <img src="{{ p.primary_image_url }}" class="product-grid-img" alt="{{p.title}}" />
+                                {% else %}
+                                    <img src="https://via.placeholder.com/200x200?text={% trans 'No Image' %}" class="product-grid-img" alt="{% trans 'No Image' %}" />
+                                {% endif %}
+                            </a>
+                            <div class="info-wrap">
+                                <a href="#" class="title">{{p.title}}</a>
+                                <div class="price mt-1">${{p.amount|floatformat:2}}</div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+                
+                {% if not products %}
+                    <div class="col-12">
+                        <div class="text-center py-4">
+                            <p class="text-muted">{% trans "No products found" %}. <a href="{% url 'useradmin:dashboard-add-products' %}">{% trans "Add your first product" %}</a></p>
+                        </div>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

@@ -1,0 +1,101 @@
+{% extends 'useradmin/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load i18n %}
+{% block content %}    
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">{% trans "Order List" %}</h2>
+            <p>{% trans "Manage all your orders from here" %}</p>
+        </div>
+        <div>
+            <input type="text" placeholder="{% trans 'Search order ID' %}" class="form-control bg-white" />
+        </div>
+    </div>
+    <div class="card mb-4">
+        <header class="card-header">
+            <div class="row gx-3">
+                <div class="col-lg-4 col-md-6 me-auto">
+                    <input type="text" placeholder="{% trans 'Search...' %}" class="form-control" />
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>{% trans "Status" %}</option>
+                        <option>{% trans "Processing" %}</option>
+                        <option>{% trans "Shipped" %}</option>
+                        <option>{% trans "Delivered" %}</option>
+                        <option>{% trans "Show all" %}</option>
+                    </select>
+                </div>
+                <div class="col-lg-2 col-6 col-md-3">
+                    <select class="form-select">
+                        <option>{% trans "Show 20" %}</option>
+                        <option>{% trans "Show 30" %}</option>
+                        <option>{% trans "Show 40" %}</option>
+                    </select>
+                </div>
+            </div>
+        </header>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>{% trans "#ID" %}</th>
+                            <th scope="col">{% trans "Name" %}</th>
+                            <th scope="col">{% trans "Email" %}</th>
+                            <th scope="col">{% trans "Phone" %}</th>
+                            <th scope="col">{% trans "Total" %}</th>
+                            <th scope="col">{% trans "Order Status" %}</th>
+                            <th scope="col">{% trans "Payment Status" %}</th>
+                            <th scope="col">{% trans "Date" %}</th>
+                            <th scope="col">{% trans "Action" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for order in orders %}
+                            <tr>
+                                <td>#{{ order.display_id }}</td>
+                                <td><b>{{ order.full_name|title|default:"N/A" }}</b></td>
+                                <td>{{ order.email|default:"N/A" }}</td>
+                                <td>{{ order.phone|default:"N/A" }}</td>
+                                <td>${{ order.amount|floatformat:2|intcomma }}</td>
+                                <td>
+                                    <span class="badge 
+                                        {% if order.order_status == 'processing' %}alert-warning
+                                        {% elif order.order_status == 'shipped' %}alert-info
+                                        {% elif order.order_status == 'delivered' %}alert-success
+                                        {% else %}alert-secondary
+                                        {% endif %}">
+                                        {{ order.get_order_status_display|title }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if order.paid_status == True %}
+                                        <span class="badge alert-success">{% trans "Paid" %}</span>
+                                    {% else %}
+                                        <span class="badge alert-danger">{% trans "Not Paid" %}</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ order.order_date|date:"d M Y" }}</td>
+                                <td>
+                                    <a href="{% url 'useradmin:order_detail' order.id %}" class="btn btn-md rounded font-sm">
+                                        {% trans "View Detail" %}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="9" class="text-center">{% trans "No orders found" %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock content %}

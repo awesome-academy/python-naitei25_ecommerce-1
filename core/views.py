@@ -5,12 +5,11 @@ from django.shortcuts import redirect
 from django.http import JsonResponse
 from .models import Product
 from django.template.loader import render_to_string
-from django.db.models import Avg
+from django.db.models import Avg, Count
 from core.models import ProductReview
 from django.shortcuts import get_object_or_404
 from core.models import *
 from core.models import Image
-from core.fake_data import *
 from core.models import Vendor
 from django.core.paginator import Paginator
 from django.db.models import Q
@@ -21,10 +20,10 @@ from core.models import Coupon, Product, Category, Vendor, CartOrder, CartOrderP
 # Create your views here.
 from taggit.models import Tag
 from core.constants import *
-
-
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from .models import Product, Image
+from core.forms import ProductReviewForm
 
 def index(request):
     # Base query: các sản phẩm đã publish
@@ -68,101 +67,102 @@ def index(request):
 
     return render(request, 'core/index.html', context)
 
-
+@login_required
 def cart_view(request):
     cart_total_amount = 0
+    cart_items = {}
+
     if 'cart_data_obj' in request.session:
         for p_id, item in request.session['cart_data_obj'].items():
-            cart_total_amount += int(item['qty']) * float(item['price'])
+            try:
+                price = float(item.get('price', 0) or 0)
+                qty = int(item.get('qty', 1))
+                subtotal = qty * price
+            except (ValueError, TypeError):
+                price = 0
+                qty = 0
+                subtotal = 0
+
+            item['subtotal'] = subtotal
+            cart_items[p_id] = item
+            cart_total_amount += subtotal
+
         return render(request, "core/cart.html", {
-            "cart_data": request.session['cart_data_obj'],
-            'totalcartitems': len(request.session['cart_data_obj']),
+            "cart_data": cart_items,
+            'totalcartitems': len(cart_items),
             'cart_total_amount': cart_total_amount
         })
     else:
         messages.warning(request, "Your cart is empty")
         return redirect("core:index")
- 
+
 def add_to_cart(request):
-    product_id = request.GET.get('id')
-    qty = int(request.GET.get('qty', 1))
+    cart_product = {}
 
-    if qty <= 0:
-        return JsonResponse({'error': 'Quantity must be greater than 0'}, status=400)
-
-    product = get_object_or_404(Product, pid=product_id)
-    image_obj = Image.objects.filter(object_type='Product', object_id=product_id, is_primary=True).first()
-
-    cart_product = {
-        product_id: {
-            'title': product.title,
-            'qty': qty,
-            'price': float(product.amount),
-            'image': image_obj.url if image_obj else '',
-            'pid': product.pid,
-        }
+    cart_product[str(request.GET['id'])] = {
+        'title': request.GET['title'],
+        'qty': request.GET['qty'],
+        'price': request.GET['price'],
+        'image': request.GET['image'],
+        'pid': request.GET['id'],
     }
 
-    cart_data = request.session.get('cart_data_obj', {})
+    if 'cart_data_obj' in request.session:
+        if str(request.GET['id']) in request.session['cart_data_obj']:
 
-    if product_id in cart_data:
-        cart_data[product_id]['qty'] += qty
+            cart_data = request.session['cart_data_obj']
+            cart_data[str(request.GET['id'])]['qty'] = int(cart_product[str(request.GET['id'])]['qty'])
+            cart_data.update(cart_data)
+            request.session['cart_data_obj'] = cart_data
+        else:
+            cart_data = request.session['cart_data_obj']
+            cart_data.update(cart_product)
+            request.session['cart_data_obj'] = cart_data
+
     else:
-        cart_data.update(cart_product)
+        request.session['cart_data_obj'] = cart_product
+    return JsonResponse({"data":request.session['cart_data_obj'], 'totalcartitems': len(request.session['cart_data_obj'])})
 
-    request.session['cart_data_obj'] = cart_data
-
-    return JsonResponse({
-        "data": cart_data,
-        "totalcartitems": len(cart_data)
-    })
+@login_required
 def delete_item_from_cart(request):
-    product_id = str(request.GET.get('id'))
+    product_id = str(request.GET['id'])
+    if 'cart_data_obj' in request.session:
+        if product_id in request.session['cart_data_obj']:
+            cart_data = request.session['cart_data_obj']
+            del request.session['cart_data_obj'][product_id]
+            request.session['cart_data_obj'] = cart_data
 
-    cart_data = request.session.get('cart_data_obj', {})
+    cart_total_amount = 0
+    if 'cart_data_obj' in request.session:
+        for p_id, item in request.session['cart_data_obj'].items():
+            cart_total_amount += int(item['qty']) * float(item['price'])
 
-    if product_id in cart_data:
-        del cart_data[product_id]
-        request.session['cart_data_obj'] = cart_data
+    context = render_to_string("core/async/cart-table.html", {"cart_data":request.session['cart_data_obj'], 'totalcartitems': len(request.session['cart_data_obj']), 'cart_total_amount':cart_total_amount})
+    return JsonResponse({"data": context, 'totalcartitems': len(request.session['cart_data_obj'])})
 
-    cart_total_amount = sum(
-        int(item['qty']) * float(item['price'])
-        for item in cart_data.values()
-    )
-
-    context_html = render_to_string("core/async/cart-list.html", {
-        "cart_data": cart_data,
-        "totalcartitems": len(cart_data),
-        "cart_total_amount": cart_total_amount
-    })
-    return HttpResponse(context_html)
-
-from django.template.loader import render_to_string
-from django.http import HttpResponse
-
+@login_required
 def update_cart(request):
-    product_id = str(request.GET.get('id'))
-    product_qty = request.GET.get('qty')
+    product_id = str(request.GET['id'])
+    product_qty = request.GET['qty']
 
-    cart_data = request.session.get('cart_data_obj', {})
+    if 'cart_data_obj' in request.session:
+        if product_id in request.session['cart_data_obj']:
+            cart_data = request.session['cart_data_obj']
+            cart_data[str(request.GET['id'])]['qty'] = product_qty
+            request.session['cart_data_obj'] = cart_data
 
-    if product_id in cart_data:
-        cart_data[product_id]['qty'] = int(product_qty)
-        request.session['cart_data_obj'] = cart_data
+    cart_total_amount = 0
+    if 'cart_data_obj' in request.session:
+        for p_id, item in request.session['cart_data_obj'].items():
+            cart_total_amount += int(item['qty']) * float(item['price'])
 
-    cart_total_amount = sum(int(item['qty']) * float(item['price']) for item in cart_data.values())
+    context = render_to_string("core/async/cart-table.html", {"cart_data":request.session['cart_data_obj'], 'totalcartitems': len(request.session['cart_data_obj']), 'cart_total_amount':cart_total_amount})
+    return JsonResponse({"data": context, 'totalcartitems': len(request.session['cart_data_obj'])})
 
-    context_html = render_to_string("core/async/cart-list.html", {
-        "cart_data": cart_data,
-        "totalcartitems": len(cart_data),
-        "cart_total_amount": cart_total_amount
-    })
-
-    return HttpResponse(context_html)
-
+@login_required
 def ajax_add_review(request, pid):
     product = Product.objects.get(pk=pid)
-    user = request.user 
+    user = request.user
 
     review = ProductReview.objects.create(
         user=user,
@@ -181,7 +181,7 @@ def ajax_add_review(request, pid):
 
     return JsonResponse(
        {
-         'bool': True,
+        'bool': True,
         'context': context,
         'average_reviews': average_reviews
        }
@@ -267,8 +267,7 @@ def category_product_list_view(request, cid):
 
     }
     return render(request, "core/category-product-list.html", context)
-def search_view(request):
-    return render(request, "core/search.html")
+
 
 def product_detail_view(request, pid):
     #product = Product.objects.get(pid = pid)
@@ -278,12 +277,39 @@ def product_detail_view(request, pid):
     address = None
     if request.user.is_authenticated:
         address = Address.objects.filter(user=request.user).first()
+        
+    reviews = ProductReview.objects.filter(product=product).order_by("-date")
+    reviews_with_width = []
+    for r in reviews:
+        width = r.rating * 20
+        reviews_with_width.append((r, width))
 
+    # average review
+    average_rating = ProductReview.objects.filter(product=product).aggregate(rating=Avg('rating'))
+    rating_counts = get_rating_counts(product)
+    
+    #product review form
+    review_form = ProductReviewForm()
+    
+    make_review = True
+    
+    if request.user.is_authenticated:
+        user_review_count = ProductReview.objects.filter(user=request.user, product=product).count()
+    
+        if user_review_count > 0:
+            make_review = False
     context = {
         "p": product,
-        "address": address
+        "address": address,
+        "products": products,
+        "reviews": reviews,
+        "average_rating": average_rating,
+        "reviews_with_width": reviews_with_width,
+        "rating_counts": rating_counts,
+        "review_form": review_form,
+        "make_review": make_review
     }
-    
+
     return render(request, "core/product-detail.html", context)
 
 def vendor_list_view(request):
@@ -399,7 +425,7 @@ def get_sorting_url(request, sort_by, order):
     params['sort'] = sort_by
     params['order'] = order
     return f"{request.path}?{params.urlencode()}"
-    
+
 def search_view(request):
     query = request.GET.get("q", "").strip()  # lấy query và xóa khoảng trắng đầu/cuối
 
@@ -410,13 +436,59 @@ def search_view(request):
             Q(title__icontains=query) | Q(description__icontains=query)
         ).order_by("-date")
     page_number = request.GET.get("page", DEFAULT_PAGE)
-    paginator = Paginator(products, PRODUCTS_PER_PAGE)  
+    paginator = Paginator(products, PRODUCTS_PER_PAGE)
     page_obj = paginator.get_page(page_number)
 
     context = {
         "products": page_obj,
         "query": query,
         "result_count": products.count(),
-        "page_obj": page_obj, 
+        "page_obj": page_obj,
     }
     return render(request, "core/search.html", context)
+def filter_product(request):
+    # 1. Lấy tất cả sản phẩm làm nền tảng
+    products = Product.objects.filter(product_status="published")
+
+    # 2. An toàn lấy các tham số. Dùng .get() để tránh lỗi
+    categories = request.GET.getlist("category[]")
+    vendors = request.GET.getlist("vendor[]")
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
+
+    # 3. Áp dụng các bộ lọc một cách tích lũy (chỉ khi có giá trị)
+    
+    # Lọc theo giá nếu có giá trị min và max
+    if min_price and max_price:
+        # Lọc các sản phẩm có giá trong khoảng [min_price, max_price]
+        products = products.filter(amount__gte=min_price, amount__lte=max_price)
+
+    # Lọc theo category nếu có category được chọn
+    if len(categories) > 0:
+        products = products.filter(category_id__in=categories)
+
+    # Lọc theo vendor nếu có vendor được chọn
+    if len(vendors) > 0:
+        products = products.filter(vendor_id__in=vendors)
+    
+    # 4. Áp dụng distinct và order_by ở cuối cùng
+    # distinct() đảm bảo mỗi sản phẩm chỉ xuất hiện một lần
+    products = products.distinct().order_by("-pid")
+
+    # 5. Render và trả về JSON
+    data = render_to_string("core/async/product-list.html", {"products": products})
+    return JsonResponse({"data": data, "count": products.count()})
+
+def get_rating_counts(product):
+    # Đếm số lượng review theo từng mức rating
+    queryset = ProductReview.objects.filter(product=product).values('rating').annotate(count=Count('id'))
+    rating_dict = {item['rating']: item['count'] for item in queryset}
+    results = []
+    for value, stars in RATING:
+        results.append({
+            'rating': value,
+            'stars': stars,
+            'count': rating_dict.get(value, 0)
+        })
+    return results
+

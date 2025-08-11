@@ -17,7 +17,6 @@
     <!-- Template CSS -->
     <link rel="stylesheet" href="{% static 'assets/css/plugins/slider-range.css' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
@@ -135,20 +134,21 @@
                                     <span><span class="lable">{% trans "Wishlist" %}</span></span>
                                 </div>
                                 <div class="header-action-icon-2">
-                                    <span class="mini-cart-icon">
-                                        <img alt="E-commerce" src="{% static 'assets/imgs/theme/icons/icon-cart.svg' %}" />
-                                        <span class="pro-count blue cart-items-count">0</span>
-                                    </span>
-                                    <span><span class="lable">{% trans "Cart" %}</span></span>
-                                    <div class="cart-dropdown-wrap cart-dropdown-hm2">
-                                        <div class="shopping-cart-footer">
-                                            <div class="shopping-cart-button">
-                                                <span class="outline">{% trans "View cart" %}</span>
-                                                <a href="{% url 'core:checkout' %}" class="outline">{% trans "View cart" %}</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                  <a class="mini-cart-icon" href="{% url 'core:cart' %}">
+                                      <img alt="E-commerce" src="{% static 'assets/imgs/theme/icons/icon-cart.svg' %}" />
+                                      <span class="pro-count blue cart-items-count">{{ request.session.cart_data_obj|length }}</span>
+                                  </a>
+                                  <a href="{% url 'core:cart' %}"><span class="lable">{% trans "Cart" %}</span></a>
+                                  <div class="cart-dropdown-wrap cart-dropdown-hm2">
+
+                                      <div class="shopping-cart-footer">
+
+                                          <div class="shopping-cart-button">
+                                              <a href="{% url 'core:cart' %}" class="outline">{% trans "View cart" %}</a>
+                                          </div>
+                                      </div>
+                                  </div>
+                              </div>
                                 <div class="header-action-icon-2">
                                     <span>
                                         <img class="svgInject" alt="E-commerce" src="{% static 'assets/imgs/theme/icons/icon-user.svg' %}" />
@@ -157,14 +157,14 @@
                                     <div class="cart-dropdown-wrap cart-dropdown-hm2 account-dropdown">
                                         <ul>
                                             <li><a href="{% url 'core:dashboard' %}"><i class="fi fi-rs-user mr-10"></i>{% trans "My Account" %}</a></li>
-                                            <li><a href="{% url 'useradmin:dashboard' %}"><i class="fi fi-rs-user mr-10"></i>{% trans "Admin Dashboard" %}</a></li>
+                                            <li><a href="{% url 'core:dashboard' %}"><i class="fi fi-rs-user mr-10"></i>{% trans "Admin Dashboard" %}</a></li>
                                             <li><span><i class="fi fi-rs-heart mr-10"></i>{% trans "My Wishlist" %}</span></li>
                                             <li><span><i class="fi fi-rs-settings-sliders mr-10"></i>{% trans "Setting" %}</span></li>
 
                                             {% if request.user.is_authenticated %}
-                                            <li><a href="{% url 'userauths:sign-out' %}"><i class="fi fi-rs-sign-out mr-10"></i>Sign out</a></li>
+                                            <li><a href="{% url 'userauths:sign-out' %}"><i class="fi fi-rs-sign-out mr-10"></i>{% trans "Sign out" %}</a></li>
                                             {% else %}
-                                            <li><a href="{% url 'userauths:sign-in' %}"><i class="fi fi-rs-sign-in mr-10"></i>Sign In</a></li>
+                                            <li><a href="{% url 'userauths:sign-in' %}"><i class="fi fi-rs-sign-in mr-10"></i>{% trans "Sign In" %}</a></li>
                                             {% endif %}
                                         </ul>
                                     </div>
@@ -663,6 +663,6 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/slick-carousel@1.8.1/slick/slick.min.js"></script>
     <script type="text/javascript" src="{% static 'assets/js/product_detail_slider.js' %}"></script>
     {% block extra_js %}{% endblock extra_js %}
-    
+
 </body>
 </html>

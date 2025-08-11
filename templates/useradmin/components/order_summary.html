@@ -1,0 +1,33 @@
+{% load i18n %}
+<tr>
+    <td colspan="4">
+        <article class="float-end">
+            <dl class="dlist">
+                <dt>{% trans "Tax" %}:</dt>
+                <dd>$0.00</dd>
+            </dl>
+            <dl class="dlist">
+                <dt>{% trans "Shipping cost" %}:</dt>
+                <dd>$0.00</dd>
+            </dl>
+            <dl class="dlist">
+                <dt>{% trans "Discount" %}:</dt>
+                <dd>${{ order.saved|default:"0"|floatformat:2 }}</dd>
+            </dl>
+            <dl class="dlist">
+                <dt>{% trans "Grand total" %}:</dt>
+                <dd><b class="h5">${{ order.amount|floatformat:2 }}</b></dd>
+            </dl>
+            <dl class="dlist">
+                <dt class="text-muted">{% trans "Status" %}:</dt>
+                <dd>
+                    {% if order.paid_status == True %}
+                        <span class="badge rounded-pill alert-success text-success">{% trans "Paid" %}</span>
+                    {% else %}
+                        <span class="badge rounded-pill alert-danger text-danger">{% trans "Not Paid" %}</span>
+                    {% endif %}
+                </dd>
+            </dl>
+        </article>
+    </td>
+</tr>

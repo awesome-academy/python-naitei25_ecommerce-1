@@ -10,7 +10,6 @@ from cloudinary.models import CloudinaryField
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from core.constants import *
-
 from django.contrib.auth.models import AbstractUser
 from userauths.models import User
 from . import constants as C
@@ -109,8 +108,8 @@ class Vendor(models.Model):
         db_table = 'vendor'
         verbose_name = "Vendor"
         verbose_name_plural = "Vendors"
-        
-    
+
+
     @property
     def primary_image(self):
         return Image.objects.filter(object_type='Vendor', object_id=self.vid, is_primary=True).first()
@@ -185,6 +184,20 @@ class Category(models.Model):
         db_table = 'category'
         verbose_name = "Category"
         verbose_name_plural = "Categories"
+    def get_primary_image(self):
+        """Trả về đối tượng Image chính (primary)."""
+        return Image.objects.filter(
+            object_type='Category',
+            object_id=self.cid,
+            is_primary=True
+        ).first()
+    @property
+    def primary_image_url(self):
+        """Trả về URL của ảnh chính (nếu có)."""
+        image = self.get_primary_image()
+        if image:
+            return image.image.url.replace("http://", "https://")
+        return '/static/assets/imgs/default.jpg'
 
 class Product(models.Model):
     pid = ShortUUIDField(unique=True, length=10, max_length=C.MAX_LENGTH_PID , alphabet="abcdefgh12345", primary_key=True)
