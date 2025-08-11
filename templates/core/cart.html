@@ -38,8 +38,14 @@
                         <table class="table no-border">
                             <tbody>
                                 <tr>
-                                    <td class="cart_total_label"><h6 class="text-muted">{% trans "Subtotal" %}</h6></td>
-                                    <td class="cart_total_amount"><h4 class="text-brand text-end">${{ cart_total_amount|floatformat:2 }}</h4></td>
+                                  <td class="cart_total_label">
+                                      <h6 class="text-muted">{% trans "Subtotal" %}</h6>
+                                  </td>
+                                  <td class="cart_total_amount">
+                                      <h4 id="summary-subtotal" class="text-brand text-end">
+                                          ${{ cart_total_amount|floatformat:2 }}
+                                      </h4>
+                                  </td>
                                 </tr>
                                 <tr><td colspan="2"><div class="divider-2 mt-10 mb-10"></div></td></tr>
                                 <tr>
@@ -47,8 +53,14 @@
                                     <td class="cart_total_amount"><h5 class="text-heading text-end">{% trans "Free" %}</h5></td>
                                 </tr>
                                 <tr>
-                                    <td class="cart_total_label"><h6 class="text-muted">{% trans "Total" %}</h6></td>
-                                    <td class="cart_total_amount"><h4 class="text-brand text-end">${{ cart_total_amount|floatformat:2 }}</h4></td>
+                                  <td class="cart_total_label">
+                                      <h6 class="text-muted">{% trans "Total" %}</h6>
+                                  </td>
+                                  <td class="cart_total_amount">
+                                      <h4 id="summary-total" class="text-brand text-end">
+                                          ${{ cart_total_amount|floatformat:2 }}
+                                      </h4>
+                                  </td>
                                 </tr>
                             </tbody>
                         </table>

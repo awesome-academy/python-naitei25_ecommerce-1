@@ -60,6 +60,7 @@ OBJECT_TYPE_CHOICES = (
 )
 
 ORDER_STATUS_CHOICES = (
+    ('pending', 'Pending'),
     ('processing', 'Processing'),
     ('shipped', 'Shipped'),
     ('delivered', 'Delivered'),
