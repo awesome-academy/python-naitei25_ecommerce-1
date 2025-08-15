@@ -12,7 +12,7 @@ urlpatterns = [
 
     path("about_us/", about_us, name="about_us"),
     path("dashboard/", customer_dashboard, name="dashboard"),
-    path("checkout/<oid>/", checkout, name="checkout"),
+    path("checkout/<oid>/<oid>/", checkout, name="checkout"),
     path("payment-completed/", payment_completed_view, name="payment-completed"),
     path("payment-failed/", payment_failed_view, name="payment-failed"),
     path("dashboard/order/<id>/", order_detail, name="order-detail"),
@@ -33,5 +33,6 @@ urlpatterns = [
     path("search/", search_view, name="search"),
     
     #add review
-    path("ajax-add-review/<pid>", ajax_add_review, name="ajax-add-review")
+    path("ajax-add-review/<pid>", ajax_add_review, name="ajax-add-review"),
+    path("filter-products/", filter_product, name="filter-product"),
 ]

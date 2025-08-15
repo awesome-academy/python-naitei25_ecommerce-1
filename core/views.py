@@ -28,6 +28,8 @@ from core.forms import ProductReviewForm
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.db import transaction
+from django.db.models import Min, Max
+from decimal import Decimal, InvalidOperation
 
 def index(request):
     # Base query: các sản phẩm đã publish
@@ -208,16 +210,6 @@ def ajax_add_review(request, pid):
         'average_reviews': average_reviews
        }
     )
-def product_list_view(request):
-    products = Product.objects.filter(product_status="published").order_by("-pid")
-    tags = Tag.objects.all().order_by("-id")[:TAG_LIMIT]
-
-    context = {
-        "products":products,
-        "tags":tags,
-    }
-
-    return render(request, 'core/product-list.html', context)
 
 def about_us(request):
     return render(request, "core/about_us.html")
@@ -569,3 +561,101 @@ def get_rating_counts(product):
         })
     return results
 
+def _to_decimal(v):
+    if v in (None, ""): 
+        return None
+    try:
+        return Decimal(str(v).replace(",", "."))
+    except (InvalidOperation, TypeError, ValueError):
+        return None
+
+def _getlist(request, name):
+    # hỗ trợ cả name và name[] (tùy frontend gửi)
+    return request.GET.getlist(f"{name}[]") or request.GET.getlist(name)
+
+def build_products_qs(request):
+    """Trả về queryset đã áp dụng các filter từ URL."""
+    categories = _getlist(request, "category")
+    vendors    = _getlist(request, "vendor")
+    min_price  = _to_decimal(request.GET.get("min_price"))
+    max_price  = _to_decimal(request.GET.get("max_price"))
+
+    qs = Product.objects.filter(product_status="published")
+
+    if min_price is not None:
+        qs = qs.filter(amount__gte=min_price)
+    if max_price is not None:
+        qs = qs.filter(amount__lte=max_price)
+    if categories:
+        qs = qs.filter(category_id__in=categories)
+    if vendors:
+        qs = qs.filter(vendor_id__in=vendors)
+
+    return qs.select_related("category", "vendor").order_by("-pid")
+# --------------------------------
+
+def product_list_view(request):
+    # dữ liệu cho sidebar/filter
+    tags = Tag.objects.all().order_by("-id")[:TAG_LIMIT]
+    categories_all = Category.objects.all()
+    vendors_all = Vendor.objects.all()
+    min_max_price = Product.objects.aggregate(Min("amount"), Max("amount"))
+
+    # áp dụng filter từ URL
+    qs = build_products_qs(request)
+
+    # phân trang
+    try:
+        page_number = int(request.GET.get("page", DEFAULT_PAGE))
+    except (TypeError, ValueError):
+        page_number = DEFAULT_PAGE
+    try:
+        per_page = int(request.GET.get("per_page", PRODUCTS_PER_PAGE))
+    except (TypeError, ValueError):
+        per_page = PRODUCTS_PER_PAGE
+
+    paginator = Paginator(qs, per_page)
+    page_obj  = paginator.get_page(page_number)
+
+    context = {
+        "products": page_obj,          # Page object, lặp trong template được
+        "page_obj": page_obj,
+        "tags": tags,
+        "categories": categories_all,
+        "vendors": vendors_all,
+        "min_max_price": min_max_price,   # dùng {{ min_max_price.amount__min }} / {{ ...max }}
+    }
+    return render(request, "core/product-list.html", context)
+
+
+def filter_product(request):
+    # Dùng chung logic lọc
+    qs = build_products_qs(request)
+
+    # phân trang (nếu frontend truyền)
+    try:
+        page_number = int(request.GET.get("page", DEFAULT_PAGE))
+    except (TypeError, ValueError):
+        page_number = DEFAULT_PAGE
+    try:
+        per_page = int(request.GET.get("per_page", PRODUCTS_PER_PAGE))
+    except (TypeError, ValueError):
+        per_page = PRODUCTS_PER_PAGE
+
+    paginator = Paginator(qs, per_page)
+    page_obj  = paginator.get_page(page_number)
+
+    # render partial (nhớ truyền request để giữ query cho pagination)
+    html = render_to_string(
+        "core/async/product-list.html",
+        {"products": page_obj, "page_obj": page_obj},
+        request=request,
+    )
+
+    return JsonResponse({
+        "data": html,
+        "count": paginator.count,
+        "page": page_obj.number,
+        "has_next": page_obj.has_next(),
+        "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
+    })
