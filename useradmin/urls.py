@@ -14,4 +14,5 @@ urlpatterns = [
     path("change_order_status/<oid>/", views.change_order_status, name="change_order_status"),
     path("shop_page/", views.shop_page, name="shop_page"),
     path("reviews/", views.reviews, name="reviews"),
+    path('vendor/create/', views.create_vendor, name='create-vendor'),
 ]
