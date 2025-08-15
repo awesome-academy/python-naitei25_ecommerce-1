@@ -4,28 +4,36 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib import messages
 from django.utils.translation import gettext as _
 from userauths.models import User
+from utils.email_service import send_activation_email
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_decode
 
 
 def register_view(request):
+    if request.user.is_authenticated:
+        logout(request)
+        return redirect('userauths:sign-up')
+    
     if request.method == "POST":
         form = UserRegisterForm(request.POST or None)
         if form.is_valid():
-            new_user = form.save()
+            new_user = form.save(commit=False)
+            new_user.is_active = False
+            new_user.save()
             username = form.cleaned_data.get("username")
-            role = form.cleaned_data.get("role")
-            messages.success(
-                request,
-                _(f"Hello {username}, your account was created successfully.")
-            )
-            new_user = authenticate(username=form.cleaned_data['email'],
-                                    password=form.cleaned_data['password1']
-            )
-            if new_user:
-                login(request, new_user)
-                if role == "vendor":
-                    return redirect("useradmin:dashboard")
-                else:
-                    return redirect("core:index")
+            email = form.cleaned_data.get("email")
+            #Tao token va uidb64
+            uidb64 = urlsafe_base64_encode(force_bytes(new_user.pk))
+            token = default_token_generator.make_token(new_user)
+            send_activation_email(email, username, uidb64, token)
+            #send_welcome_email(email, username)
+            context = {
+                "username": username,
+                "email": email
+            }
+            return render(request, "userauths/activation_pending.html", context)  
     else:
         form = UserRegisterForm()
     return render(request, "userauths/sign-up.html", {"form": form})
@@ -57,18 +65,6 @@ def login_view(request):
         except:
             messages.warning(request, f"User with {email} does not exists")
 
-        user = authenticate(request, email=email, password=password)
-
-        if user is not None:
-            login(request, user)
-            messages.success(request, f"Login successfully!")
-            if user.role == "vendor":
-                return redirect("useradmin:dashboard")
-            else:
-                return redirect("core:index")
-        else:
-            messages.warning(request, "User does not exist. Create an account.")
-
     context = {}
 
     return render(request, "userauths/sign-in.html", context)
@@ -79,3 +75,19 @@ def logout_view(request):
     return redirect("userauths:sign-in")
         
         
+def activate_account(request, uidb64, token):
+    try:
+        uid = urlsafe_base64_decode(uidb64).decode()
+        user = User.objects.get(pk=uid)
+    except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+        user = None
+
+    if user and default_token_generator.check_token(user, token):
+        user.is_active = True
+        user.save()
+        messages.success(request, "Tài khoản đã được kích hoạt, bạn có thể đăng nhập.")
+        return redirect("userauths:sign-in")
+    else:
+        messages.error(request, "Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.")
+        return redirect("core:index")
+    
