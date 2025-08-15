@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.contrib import messages
 from django.shortcuts import redirect
 from django.http import JsonResponse
+from urllib3 import request
 from .models import Product
 from django.template.loader import render_to_string
 from django.db.models import Avg, Count
@@ -23,9 +24,15 @@ from core.constants import *
 from django.contrib.auth.decorators import login_required
 from decimal import Decimal, ROUND_HALF_UP
 from .models import Product, Image
-from core.forms import ProductReviewForm
 from django.utils import timezone
 from django.utils.translation import gettext as _
+from django.db.models import Min, Max
+from decimal import Decimal, InvalidOperation
+import calendar
+from django.db.models import Count, Avg
+from django.db.models.functions import ExtractMonth
+from userauths.models import *
+from django.views.decorators.http import require_http_methods
 from django.db import transaction
 from django.templatetags.static import static
 from django.urls import reverse
@@ -34,6 +41,7 @@ from django.views.decorators.csrf import csrf_exempt
 from paypal.standard.forms import PayPalPaymentsForm
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
+
 
 
 def index(request):
@@ -263,9 +271,93 @@ def product_list_view(request):
 
 def about_us(request):
     return render(request, "core/about_us.html")
-
+@login_required
 def customer_dashboard(request):
-    return render(request, 'core/dashboard.html')
+    CART_STATUS = 'processing'
+
+    # Base queryset cho user hiện tại (tối ưu join)
+    base_qs = (
+        CartOrder.objects
+        .filter(user=request.user)
+        .select_related('vendor')
+        .prefetch_related('order_products')
+    )
+
+    # Giỏ hàng (đơn ở trạng thái processing)
+    carts_list = base_qs.filter(order_status=CART_STATUS).order_by('-order_date')
+
+    # Đơn hàng đã chốt (không phải processing)
+    orders_list = base_qs.exclude(order_status=CART_STATUS).order_by('-order_date')
+
+    # Địa chỉ của user
+    address_list = Address.objects.filter(user=request.user).order_by('-id')
+
+    # Thống kê số đơn hàng (đÃ CHỐT) theo tháng
+    monthly = (
+        base_qs.exclude(order_status=CART_STATUS)
+        .annotate(month=ExtractMonth('order_date'))
+        .values('month')
+        .annotate(count=Count('id'))
+        .order_by('month')
+    )
+
+    month = []
+    total_orders = []
+    for row in monthly:
+        # row['month'] có thể là None nếu DB trả về kỳ lạ; an toàn thêm check
+        m = row['month']
+        if m:
+            month.append(calendar.month_name[m])
+            total_orders.append(row['count'])
+
+    # Xử lý thêm địa chỉ
+    if request.method == "POST":
+        addr_text = request.POST.get("address", "").strip()
+        mobile = request.POST.get("mobile", "").strip()
+
+        if not addr_text or not mobile:
+            messages.error(request, "Vui lòng nhập đầy đủ địa chỉ và số điện thoại.")
+        else:
+            Address.objects.create(
+                user=request.user,
+                address=addr_text,
+                mobile=mobile,
+            )
+            messages.success(request, "Đã thêm địa chỉ thành công.")
+        return redirect("core:dashboard")
+
+    # Hồ sơ user (an toàn tránh DoesNotExist)
+    user_profile = Profile.objects.filter(user=request.user).first()
+
+    context = {
+        "user_profile": user_profile,
+        # Danh sách
+        "carts_list": carts_list,           # giỏ hàng (processing)
+        "orders_list": orders_list,         # đơn hàng đã chốt
+        "address_list": address_list,
+        # Thống kê
+        "month": month,
+        "total_orders": total_orders,
+    }
+    return render(request, 'core/dashboard.html', context)
+@login_required
+@require_http_methods(["GET", "POST"])
+def make_address_default(request):
+    addr_id = request.GET.get("id") or request.POST.get("id")
+    if not addr_id:
+        return JsonResponse({"boolean": False, "msg": "missing id"}, status=400)
+
+    try:
+        with transaction.atomic():
+            # Chỉ cập nhật trong phạm vi user hiện tại
+            Address.objects.filter(user=request.user, status=True).update(status=False)
+            addr = Address.objects.select_for_update().get(id=addr_id, user=request.user)
+            addr.status = True
+            addr.save(update_fields=["status"])
+    except Address.DoesNotExist:
+        return JsonResponse({"boolean": False, "msg": "not found"}, status=404)
+
+    return JsonResponse({"boolean": True, "id": int(addr_id)})
 
 def search_view(request):
     return render(request, "core/search.html")
@@ -396,9 +488,12 @@ def payment_failed_view(request):
     return render(request, 'core/payment-failed.html')
 
 def order_detail(request, id):
-    context = {"order_items": get_order_items()}
+    order = CartOrder.objects.get(user=request.user, id=id)
+    order_items = CartOrderProducts.objects.filter(order=order)
+    context = {
+        "order_items": order_items,
+    }
     return render(request, 'core/order-detail.html', context)
-
 def category_list_view(request):
     categories = Category.objects.all()
     category_data = []

@@ -38,4 +38,8 @@ urlpatterns = [
     path("checkout/cod/<int:oid>/accept/", cod_accept, name="cod-accept"),
     path("checkout/<int:oid>/", checkout, name="checkout"),
     path("orders/", order_list, name="orders"),
+    path("ajax-add-review/<pid>", ajax_add_review, name="ajax-add-review"),
+    # Dashboard URL
+    path("dashboard/", customer_dashboard, name="dashboard"),
+    path("make-default-address/", make_address_default, name="make-default-address"),
 ]

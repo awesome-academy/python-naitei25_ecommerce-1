@@ -208,8 +208,10 @@ __marimo__/
 
 static/
 staticfiles/
-
+/media/
 nhap.html
 createdb.sql
 core/fake_data.py
 static.zip
+media/
+
