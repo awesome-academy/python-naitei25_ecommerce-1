@@ -31,4 +31,7 @@ urlpatterns = [
     path("vendors/", vendor_list_view, name="vendor-list"),
     path("vendor/<vid>/", vendor_detail_view, name="vendor-detail"),
     path("search/", search_view, name="search"),
+    # Dashboard URL
+    path("dashboard/", customer_dashboard, name="dashboard"),
+    path("make-default-address/", make_address_default, name="make-default-address"),
 ]

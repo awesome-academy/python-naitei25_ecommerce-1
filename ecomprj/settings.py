@@ -156,7 +156,9 @@ DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
-
+TEMPLATES[0]['OPTIONS']['context_processors'] += [
+    'django.template.context_processors.media',
+]
 # Login settings
 LOGIN_URL = '/user/sign-in/'
 LOGIN_REDIRECT_URL = '/useradmin/dashboard/'
