@@ -1,0 +1,110 @@
+{% extends 'useradmin/base.html' %}
+{% load static %}
+{% load i18n %}
+{% block content %}
+
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">{% trans "Create Vendor Account" %}</h2>
+            <p>{% trans "Fill out the form to start selling on our platform" %}</p>
+        </div>
+        <div>
+            <a href="{% url 'useradmin:dashboard' %}" class="btn btn-light"><i class="material-icons md-arrow_back"></i> {% trans "Back" %}</a>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="row mb-4">
+                    <div class="col-xl-8 col-lg-8">
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Shop Name" %} *</label>
+                            <input type="text" name="title" placeholder="{% trans 'Enter your shop name' %}" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Description" %} *</label>
+                            <textarea name="description" placeholder="{% trans 'Tell customers about your shop' %}" class="form-control" rows="4" required></textarea>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Address" %} *</label>
+                            <input type="text" name="address" placeholder="{% trans 'Your shop address' %}" class="form-control" required>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Contact" %} *</label>
+                            <input type="text" name="contact" placeholder="{% trans 'Phone number' %}" class="form-control" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">{% trans "Chat Response Time (minutes)" %}</label>
+                                    <input type="number" name="chat_resp_time" value="60" min="1" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">{% trans "Shipping On-time Rate (%)" %}</label>
+                                    <input type="number" name="shipping_on_time" value="95" min="1" max="100" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-4">
+                                <div class="mb-4">
+                                    <label class="form-label">{% trans "Authenticity Rating (0-5)" %}</label>
+                                    <input type="number" name="authentic_rating" value="5.0" min="0" max="5" step="0.1" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label class="form-label">{% trans "Return Period (days)" %}</label>
+                                    <input type="number" name="days_return" value="7" min="0" class="form-control">
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="mb-4">
+                                    <label class="form-label">{% trans "Warranty Period (months)" %}</label>
+                                    <input type="number" name="warranty_period" value="12" min="0" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-xl-4 col-lg-4">
+                        <div class="mb-4">
+                            <label class="form-label">{% trans "Shop Logo" %}</label>
+                            <div class="input-upload">
+                                <img src="{% static 'assets/imgs/theme/upload.svg' %}" alt="" id="imagePreview" class="img-fluid">
+                                <input class="form-control" type="file" name="image" id="imageInput" accept="image/*">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-end gap-3">
+                    <button type="submit" class="btn btn-primary">{% trans "Create Vendor Account" %}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Preview image before upload
+    document.getElementById('imageInput').onchange = function(evt) {
+        const [file] = this.files;
+        if (file) {
+            document.getElementById('imagePreview').src = URL.createObjectURL(file);
+        }
+    };
+</script>
+
+{% endblock content %}

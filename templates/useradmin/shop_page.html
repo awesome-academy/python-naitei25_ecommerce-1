@@ -14,17 +14,25 @@
             <div class="row">
                 <div class="col-xl col-lg flex-grow-0" style="flex-basis: 230px;">
                     <div class="img-thumbnail shadow w-100 bg-white position-relative text-center shop-profile-img-container">
-                        {% if request.user.profile.image %}
-                            <img src="{{ request.user.profile.image.url }}" class="center-xy img-fluid" alt="{% trans 'Profile Image' %}" />
+                        {% if vendor and vendor_image_url %}
+                            <img src="{{ vendor_image_url }}" class="center-xy" alt="{{ vendor.title }}" />
+                        {% elif request.user.profile.image %}
+                            <img src="{{ request.user.profile.image.url }}" class="center-xy" alt="{% trans 'Profile Image' %}" />
                         {% else %}
-                            <img src="https://www.testhouse.net/wp-content/uploads/2021/11/default-avatar.jpg" class="center-xy img-fluid" alt="{% trans 'Default Avatar' %}" />
+                            <img src="https://www.testhouse.net/wp-content/uploads/2021/11/default-avatar.jpg" class="center-xy" alt="{% trans 'Default Avatar' %}" />
                         {% endif %}
                     </div>
                 </div>
                 <div class="col-xl col-lg">
-                    <h3>{{request.user.profile.full_name|default:request.user.username}}</h3>
-                    <p class="mt-0 mb-0">{{request.user.email}}</p>
-                    <p class="mt-0 mb-0">{{request.user.profile.bio|default:"N/A"}}</p>
+                    {% if vendor %}
+                        <h3>{{ vendor.title }}</h3>
+                        <p class="mt-0 mb-0">{{ vendor.description }}</p>
+                        <p class="mt-0 mb-0">{% trans "Rating" %}: {{ vendor.authentic_rating }}/5.0</p>
+                    {% else %}
+                        <h3>{{request.user.profile.full_name|default:request.user.username}}</h3>
+                        <p class="mt-0 mb-0">{{request.user.email}}</p>
+                        <p class="mt-0 mb-0">{{request.user.profile.bio|default:"N/A"}}</p>
+                    {% endif %}
                 </div>
             </div>
             <!-- card-body.// -->
@@ -40,23 +48,57 @@
                 </div>
                 <!--  col.// -->
                 <div class="col-sm-6 col-lg-4 col-xl-3">
-                    <h6>{% trans "Bio Data" %}</h6>
+                    <h6>{% trans "Shop Info" %}</h6>
                     <p>
-                        {{request.user.profile.full_name|default:request.user.username}} <br />
-                        {{request.user.email}} <br />
-                        {{request.user.profile.phone|default:"N/A"}}
+                        {% if vendor %}
+                            {% trans "Address" %}: {{ vendor.address }} <br />
+                            {% trans "Contact" %}: {{ vendor.contact }} <br />
+                            {% trans "On-time Shipping" %}: {{ vendor.shipping_on_time }}%
+                        {% else %}
+                            {{request.user.profile.full_name|default:request.user.username}} <br />
+                            {{request.user.email}} <br />
+                            {{request.user.profile.phone|default:"N/A"}}
+                        {% endif %}
                     </p>
                 </div>
                 <div class="col-sm-6 col-lg-4 col-xl-3">
-                    <h6>{% trans "Address & Location" %}</h6>
+                    <h6>{% trans "Policies" %}</h6>
                     <p>
-                        {% trans "Address" %}: {{request.user.profile.address|default:"N/A"}} <br />
-                        {% trans "Country" %}: {{request.user.profile.country|default:"N/A"}} <br />
+                        {% if vendor %}
+                            {% trans "Return Period" %}: {{ vendor.days_return }} {% trans "days" %} <br />
+                            {% trans "Warranty Period" %}: {{ vendor.warranty_period }} {% trans "months" %} <br />
+                            {% trans "Chat Response Time" %}: {{ vendor.chat_resp_time }} {% trans "minutes" %}
+                        {% else %}
+                            {% trans "Address" %}: {{request.user.profile.address|default:"N/A"}} <br />
+                            {% trans "Country" %}: {{request.user.profile.country|default:"N/A"}} <br />
+                        {% endif %}
                     </p>
                 </div>
+                {% if vendor %}
+                <div class="col-sm-6 col-lg-4 col-xl-4">
+                    <a href="#" class="btn btn-outline-primary">
+                        <i class="material-icons md-edit"></i> {% trans "Edit Shop Info" %}
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
+
+    {% if not vendor and request.user.role == "vendor" %}
+    <div class="card mb-4">
+        <div class="card-body text-center">
+            <div class="py-4">
+                <i class="material-icons md-store" style="font-size: 5rem; color: #3BB77E;"></i>
+                <h3 class="mt-3">{% trans "Create Your Vendor Account" %}</h3>
+                <p>{% trans "You need to create a vendor account to start selling products" %}</p>
+                <a href="{% url 'useradmin:create-vendor' %}" class="btn btn-primary">
+                    <i class="material-icons md-add"></i> {% trans "Create Vendor Account" %}
+                </a>
+            </div>
+        </div>
+    </div>
+    {% endif %}
 
     <div class="card mb-4">
         <div class="card-body">
