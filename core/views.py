@@ -28,6 +28,7 @@ from core.forms import ProductReviewForm
 from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.db import transaction
+from django.templatetags.static import static
 
 def index(request):
     # Base query: các sản phẩm đã publish
@@ -470,8 +471,6 @@ def vendor_list_view(request):
     # Apply pagination
     paginator = Paginator(vendors, 12)  # Show 12 vendors per page
     page_obj = paginator.get_page(page_number)
-
-
 
     context = {
         "vendors": page_obj,

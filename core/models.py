@@ -85,24 +85,110 @@ class Vendor(models.Model):
     @property
     def image_set(self):
         """Get all images for this vendor"""
-        return Image.objects.filter(object_type='vendor', object_id=self.vid)
+        return Image.objects.filter(object_type='Vendor', object_id=self.vid)
 
     @property
     def banner_set(self):
         """Get all banner images for this vendor"""
         return Image.objects.filter(object_type='vendor_banner', object_id=self.vid)
+    
+    @property
+    def primary_image(self):
+        """Get primary image for this vendor"""
+        return Image.objects.filter(object_type='Vendor', object_id=self.vid, is_primary=True).first()
+    
+    @property
+    def primary_banner(self):
+        """Get primary banner image for this vendor"""
+        return Image.objects.filter(object_type='vendor_banner', object_id=self.vid, is_primary=True).first()
+
+    @property
+    def primary_image_url(self):
+        """Get primary image URL for this vendor"""
+        img = self.primary_image
+        if img:
+            try:
+                return img.image.url
+            except Exception as e:
+                print(f"Error getting image URL for vendor {self.vid}: {e}")
+                return None
+        return '/static/assets/imgs/vendor/vendor-placeholder.jpg'
 
     @property
     def primary_banner_url(self):
         """Get primary banner image URL"""
-        img = Image.objects.filter(object_type='vendor_banner', object_id=self.vid, is_primary=True).first()
+        img = self.primary_banner
         if img:
             try:
-                return img.url.url  # CloudinaryField returns a CloudinaryResource object
+                return img.image.url
             except Exception as e:
                 print(f"Error getting banner URL for vendor {self.vid}: {e}")
                 return None
-        return None
+        return '/static/assets/imgs/vendor/vendor-banner-placeholder.jpg'
+    
+    def get_default_image_url(self):
+        """Get default image URL if no primary image exists"""
+        return '/static/assets/imgs/vendor/vendor-placeholder.jpg'
+    
+    def get_default_banner_url(self):
+        """Get default banner URL if no primary banner exists"""
+        return '/static/assets/imgs/vendor/vendor-banner-placeholder.jpg'
+    
+    @property
+    def display_image_url(self):
+        """Get primary image URL or default if not exists"""
+        return self.primary_image_url or self.get_default_image_url()
+    
+    @property
+    def display_banner_url(self):
+        """Get primary banner URL or default if not exists"""
+        return self.primary_banner_url or self.get_default_banner_url()
+    
+    def add_image(self, image, alt_text=None, is_primary=False):
+        """Add a new image for this vendor"""
+        # Set all existing images as non-primary if this one is primary
+        if is_primary:
+            Image.objects.filter(object_type='Vendor', object_id=self.vid, is_primary=True).update(is_primary=False)
+        
+        # Create new image
+        return Image.objects.create(
+            url=image,
+            alt_text=alt_text or self.title,
+            object_type='Vendor',
+            object_id=self.vid,
+            is_primary=is_primary
+        )
+    
+    def add_banner(self, image, alt_text=None, is_primary=False):
+        """Add a new banner image for this vendor"""
+        # Set all existing banner images as non-primary if this one is primary
+        if is_primary:
+            Image.objects.filter(object_type='vendor_banner', object_id=self.vid, is_primary=True).update(is_primary=False)
+        
+        # Create new banner image
+        return Image.objects.create(
+            url=image,
+            alt_text=alt_text or f"{self.title} Banner",
+            object_type='vendor_banner',
+            object_id=self.vid,
+            is_primary=is_primary
+        )
+    
+    def set_primary_image(self, image_id):
+        """Set an existing image as primary"""
+        # First, unset all primary images
+        Image.objects.filter(object_type='Vendor', object_id=self.vid, is_primary=True).update(is_primary=False)
+        
+        # Then set the selected image as primary
+        return Image.objects.filter(id=image_id, object_type='Vendor', object_id=self.vid).update(is_primary=True)
+    
+    def set_primary_banner(self, image_id):
+        """Set an existing banner as primary"""
+        # First, unset all primary banners
+        Image.objects.filter(object_type='vendor_banner', object_id=self.vid, is_primary=True).update(is_primary=False)
+        
+        # Then set the selected banner as primary
+        return Image.objects.filter(id=image_id, object_type='vendor_banner', object_id=self.vid).update(is_primary=True)
 
     class Meta:
         db_table = 'vendor'
@@ -178,7 +264,29 @@ class Category(models.Model):
     @property
     def image_set(self):
         """Get all images for this category"""
-        return Image.objects.filter(object_type='category', object_id=self.cid)
+        return Image.objects.filter(object_type='Category', object_id=self.cid)
+    
+    @property
+    def primary_image(self):
+        """Get primary image for this category"""
+        return Image.objects.filter(object_type='Category', object_id=self.cid, is_primary=True).first()
+    
+    @property
+    def primary_image_url(self):
+        """Get primary image URL for this category"""
+        img = self.primary_image
+        if img:
+            try:
+                return img.image.url  # CloudinaryField
+            except Exception as e:
+                print(f"Error getting image URL for category {self.cid}: {e}")
+                return None
+        return None
+    
+    @property
+    def display_image_url(self):
+        """Get primary image URL or default"""
+        return self.primary_image_url or '/static/assets/imgs/shop/cat-1.png'
 
     class Meta:
         db_table = 'category'
