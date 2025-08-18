@@ -15,14 +15,8 @@
                     <div class="archive-header-3 mt-30 mb-80" style="background-image: url({% if vendor.primary_banner_url %}{{ vendor.primary_banner_url }}{% else %}{% static 'assets/imgs/banner/banner-1.png' %}{% endif %})">
             <div class="archive-header-3-inner">
                 <div class="vendor-logo mr-50">
-                    {% for img in vendor.image_set.all %}
-                        {% if img.is_primary and img.object_type == 'vendor' %}
-                            <img src="{{ img.url.url }}" alt="{{ img.alt_text }}" />
-                        {% endif %}
-                    {% empty %}
-                            <img src="{% static 'assets/imgs/banner/banner-1.png' %}" alt="{% trans 'Default Vendor Image' %}" />
-                    {% endfor %}
-                </div>
+    <img src="{% if vendor.primary_image_url %}{{ vendor.primary_image_url }}{% else %}{% static 'assets/imgs/vendor/vendor-placeholder.jpg' %}{% endif %}" alt="{{ vendor.title }}" />
+</div>
                     <div class="vendor-content">
                         <div class="product-category">
                             <span class="text-muted">{% trans "Since" %} {% if vendor.date %}{{vendor.date|date:"Y"}}{% else %}{% trans "N/A" %}{% endif %}</span>
@@ -146,9 +140,9 @@
                                     <div class="product-img-inner">
                                         <a href="shop-product-right.html">
                                             {% for img in p.image_set.all %}
-                                                {% if img.is_primary and img.object_type == 'product' %}
-                                                    <img class="default-img" src="{{ img.url.url }}" alt="{{ img.alt_text }}" />
-                                                    <img class="hover-img" src="{{ img.url.url }}" alt="{{ img.alt_text }}" />
+                                                {% if img.is_primary and img.object_type == 'Product' %}
+                                                    <img class="default-img" src="{{ img.image.url }}" alt="{{ img.alt_text }}" />
+                                                    <img class="hover-img" src="{{ img.image.url }}" alt="{{ img.alt_text }}" />
                                                 {% endif %}
                                             {% empty %}
                                                 <img class="default-img" src="{% static 'assets/imgs/shop/product-1-1.jpg' %}" alt="{% trans 'Default Product Image' %}" />
@@ -391,8 +385,8 @@
                             <li>
                                 <a href="shop-grid-right.html"> 
                                     {% for img in c.image_set.all %}
-                                        {% if img.is_primary and img.object_type == 'category' %}
-                                            <img src="{{ img.url.url }}" alt="{{ img.alt_text }}" />
+                                        {% if img.is_primary and img.object_type == 'Category' %}
+                                            <img src="{{ img.image.url }}" alt="{{ img.alt_text }}" />
                                         {% endif %}
                                     {% empty %}
                                         <img src="{% static 'assets/imgs/shop/cat-1.png' %}" alt="{% trans 'Default Category Image' %}" />

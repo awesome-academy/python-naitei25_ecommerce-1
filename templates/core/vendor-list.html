@@ -103,17 +103,11 @@
                             <div class="vendor-img-action-wrap">
                                 <div class="vendor-img">
                                     <a href="{% url 'core:vendor-detail' v.vid %}">
-                                        {% for img in v.image_set.all %}
-                                            {% if img.is_primary and img.object_type == 'vendor' %}
-                                                <img class="default-img" src="{{ img.url.url }}" alt="{{ img.alt_text|default:v.title }}" />
-                                            {% endif %}
-                                        {% empty %}
-                                            {% if v.primary_image_url %}
-                                                <img class="default-img" src="{{ v.primary_image_url }}" alt="{{ v.title }}" />
-                                            {% else %}
-                                                <img class="default-img" src="{% static 'assets/imgs/theme/logo.svg' %}" alt="{{ v.title }}" />
-                                            {% endif %}
-                                        {% endfor %}
+                                        {% if v.primary_image_url %}
+                                            <img class="default-img" src="{{ v.primary_image_url }}" alt="{{ v.title }}" />
+                                        {% else %}
+                                            <img class="default-img" src="{% static 'assets/imgs/vendor/vendor-placeholder.jpg' %}" alt="{{ v.title }}" />
+                                        {% endif %}
                                     </a>
                                 </div>
                                 <div class="mt-10">
