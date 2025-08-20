@@ -22,7 +22,7 @@ def dashboard(request):
         has_vendor = True
     except Vendor.DoesNotExist:
         vendor = None
-    
+
     if request.user.role == "vendor":
         if not has_vendor:
             return render(request, "useradmin/dashboard.html", {
@@ -36,14 +36,14 @@ def dashboard(request):
         return render(request, "useradmin/not_vendor.html", {
             "error_message": _("Bạn cần đăng nhập dưới quyền vendor.")
         })
-    
+
     revenue = CartOrder.objects.filter(vendor=vendor).aggregate(price=Sum(AMOUNT))
     total_orders_count = CartOrder.objects.filter(vendor=vendor).count()
     all_products = Product.objects.filter(vendor=vendor)
     all_categories = Category.objects.all()
     new_customers = User.objects.all().order_by("-id")[:6]
     latest_orders = CartOrder.objects.filter(vendor=vendor).select_related(
-        'user', 
+        'user',
         'user__profile'
     ).annotate(
         display_id=F(DISPLAY_ID),
@@ -51,11 +51,11 @@ def dashboard(request):
         email=F(EMAIL),
         phone=F(PHONE),
         total=Cast(
-            Coalesce(F(AMOUNT), Value(0)), 
+            Coalesce(F(AMOUNT), Value(0)),
             output_field=DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES)
         )
     ).order_by('-order_date')[:10]
-    
+
     this_month = datetime.datetime.now().month
     monthly_revenue = CartOrder.objects.filter(vendor=vendor, order_date__month=this_month).aggregate(price=Sum(AMOUNT))
 
@@ -83,19 +83,19 @@ def products(request, vendor):
 
     all_products = Product.objects.filter(vendor=vendor).annotate(
         display_price=Cast(
-            Coalesce('amount', Value(0)), 
+            Coalesce('amount', Value(0)),
             output_field=DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES)
         ),
         display_old_price=Cast(
-            Coalesce('old_price', Value(0)), 
+            Coalesce('old_price', Value(0)),
             output_field=DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES)
         ),
         discount_percent=Case(
             When(
                 old_price__gt=0,
                 then=Cast(
-                    (Cast(Coalesce(F('old_price'), Value(0)), DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES)) - 
-                     Cast(Coalesce(F('amount'), Value(0)), DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES))) * 100.0 / 
+                    (Cast(Coalesce(F('old_price'), Value(0)), DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES)) -
+                     Cast(Coalesce(F('amount'), Value(0)), DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES))) * 100.0 /
                     Cast(Coalesce(F('old_price'), Value(1)), DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES)),
                     output_field=DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES)
                 )
@@ -106,7 +106,7 @@ def products(request, vendor):
     ).order_by(sort_by)
 
     all_categories = Category.objects.all()
-    
+
     context = {
         "all_products": all_products,
         "all_categories": all_categories,
@@ -127,7 +127,7 @@ def add_product(request, vendor):
                 product.vendor = vendor
                 product.save()
                 form.save_m2m()
-                
+
                 if 'image' in request.FILES:
                     Image.objects.create(
                         image=request.FILES['image'],
@@ -136,12 +136,12 @@ def add_product(request, vendor):
                         object_id=product.pid,
                         is_primary=True
                     )
-            
+
             messages.success(request, f"Product '{product.title}' added successfully")
             return redirect("useradmin:dashboard-products")
     else:
         form = AddProductForm()
-    
+
     context = {
         'form': form,
         'vendor': vendor,
@@ -159,10 +159,10 @@ def edit_product(request, pid, vendor):
     except Product.DoesNotExist:
         messages.error(request, _("Không tìm thấy sản phẩm."))
         return redirect("useradmin:dashboard-products")
-    
+
     primary_image = Image.objects.filter(
-        object_type='product', 
-        object_id=product.pid, 
+        object_type='product',
+        object_id=product.pid,
         is_primary=True
     ).first()
 
@@ -174,11 +174,11 @@ def edit_product(request, pid, vendor):
                 new_form.vendor = vendor
                 new_form.save()
                 form.save_m2m()
-                
+
                 if 'image' in request.FILES:
                     if primary_image:
                         primary_image.delete()
-                    
+
                     Image.objects.create(
                         image=request.FILES['image'],
                         alt_text=product.title,
@@ -186,12 +186,12 @@ def edit_product(request, pid, vendor):
                         object_id=product.pid,
                         is_primary=True
                     )
-            
+
             messages.success(request, f"Product '{product.title}' updated successfully")
             return redirect("useradmin:dashboard-products")
     else:
         form = AddProductForm(instance=product)
-    
+
     context = {
         'form': form,
         'product': product,
@@ -205,19 +205,19 @@ def edit_product(request, pid, vendor):
 def delete_product(request, pid, vendor):
     try:
         product = Product.objects.get(pid=pid)
-        
+
         if product.vendor != vendor:
             messages.error(request, _("Bạn không có quyền xóa sản phẩm này."))
             return redirect("useradmin:dashboard-products")
-        
+
         product.status = False
         product.in_stock = False
         product.product_status = "deleted"
         product.save()
-        
+
         messages.success(request, f"Product '{product.title}' has been marked as deleted")
         return redirect("useradmin:dashboard-products")
-    
+
     except Product.DoesNotExist:
         messages.error(request, "Product not found")
         return redirect("useradmin:dashboard-products")
@@ -226,7 +226,7 @@ def delete_product(request, pid, vendor):
 @vendor_auth_required()
 def orders(request, vendor):
     orders = CartOrder.objects.filter(vendor=vendor).select_related(
-        'user', 
+        'user',
         'user__profile'
     ).annotate(
         display_id=F(DISPLAY_ID),
@@ -234,7 +234,7 @@ def orders(request, vendor):
         email=F(EMAIL),
         phone=F(PHONE),
     ).order_by(f'-{ORDER_DATE}')
-    
+
     context = {
         'orders': orders,
         'vendor': vendor,
@@ -246,7 +246,7 @@ def orders(request, vendor):
 def order_detail(request, id, vendor):
     try:
         order = CartOrder.objects.select_related(
-            'user', 
+            'user',
             'user__profile'
         ).annotate(
             display_id=F(DISPLAY_ID),
@@ -254,13 +254,13 @@ def order_detail(request, id, vendor):
             email=F(EMAIL),
             phone=F(PHONE),
         ).get(id=id)
-        
+
         if order.vendor != vendor:
             messages.error(request, _("Bạn không có quyền xem đơn hàng này."))
             return redirect("useradmin:orders")
-        
+
         order_items = CartOrderProducts.objects.filter(order=order)
-        
+
         context = {
             'order': order,
             'order_items': order_items,
@@ -273,7 +273,7 @@ def order_detail(request, id, vendor):
             ]
         }
         return render(request, "useradmin/order_detail.html", context)
-    
+
     except CartOrder.DoesNotExist:
         messages.error(request, _("Không tìm thấy đơn hàng."))
         return redirect("useradmin:orders")
@@ -284,30 +284,30 @@ def order_detail(request, id, vendor):
 def change_order_status(request, oid, vendor):
     try:
         order = CartOrder.objects.get(id=oid)
-        
+
         if order.vendor != vendor:
             messages.error(request, _("Bạn không có quyền thay đổi trạng thái đơn hàng này."))
             return redirect("useradmin:orders")
-        
+
         if request.method == "POST":
             new_status = request.POST.get("status")
             current_status = order.order_status
-            
+
             status_order = {
                 'pending': 1,
                 'processing': 2,
                 'shipped': 3,
                 'delivered': 4
             }
-            
+
             if current_status == 'delivered' and new_status != 'delivered':
                 messages.error(
-                    request, 
+                    request,
                     _("Không thể thay đổi trạng thái đơn hàng đã giao. Vui lòng tạo yêu cầu hoàn trả/đổi hàng.")
                 )
             elif status_order.get(current_status, 0) > status_order.get(new_status, 0):
                 messages.error(
-                    request, 
+                    request,
                     _("Không thể thay đổi trạng thái đơn hàng từ '{}' thành '{}'. Chỉ cho phép tiến trình tiến tới.").format(
                         current_status, new_status
                     )
@@ -318,7 +318,7 @@ def change_order_status(request, oid, vendor):
                 messages.success(request, _("Trạng thái đơn hàng đã được thay đổi từ '{}' thành '{}'").format(
                     current_status, new_status
                 ))
-        
+
         return redirect("useradmin:order_detail", order.id)
     except CartOrder.DoesNotExist:
         messages.error(request, _("Không tìm thấy đơn hàng."))
@@ -329,35 +329,35 @@ def shop_page(request):
     try:
         vendor = Vendor.objects.get(user=request.user)
         has_vendor = True
-        
+
         try:
             vendor_image = Image.objects.get(
-                object_type='vendor', 
+                object_type='vendor',
                 object_id=vendor.vid,
                 is_primary=True
             )
             vendor_image_url = vendor_image.image.url
         except Image.DoesNotExist:
             vendor_image_url = None
-        
+
         products = Product.objects.filter(vendor=vendor)
-        
+
         revenue = CartOrder.objects.filter(
             vendor=vendor,
             paid_status=True
         ).aggregate(price=Sum(AMOUNT))
-        
+
         total_sales = CartOrderProducts.objects.filter(
             order__vendor=vendor,
             order__paid_status=True
         ).aggregate(qty=Sum("qty"))
-        
+
         vendor_ratings = ProductReview.objects.filter(
             product__vendor=vendor
         ).aggregate(
             avg_rating=Coalesce(Avg('rating'), Value(0.0))
         )
-        
+
     except Vendor.DoesNotExist:
         vendor = None
         has_vendor = False
@@ -366,7 +366,7 @@ def shop_page(request):
         revenue = {'price': 0}
         total_sales = {'qty': 0}
         vendor_ratings = {'avg_rating': 0}
-        
+
     context = {
         'vendor': vendor,
         'vendor_image_url': vendor_image_url,
@@ -376,7 +376,7 @@ def shop_page(request):
         'vendor_ratings': vendor_ratings,
         'has_vendor': has_vendor,
     }
-    
+
     return render(request, "useradmin/shop_page.html", context)
 
 @login_required
@@ -384,7 +384,7 @@ def shop_page(request):
 def reviews(request, vendor):
     vendor_products = Product.objects.filter(vendor=vendor).values_list('pid', flat=True)
     reviews = ProductReview.objects.filter(product__pid__in=vendor_products)
-    
+
     context = {
         'reviews': reviews,
         'vendor': vendor,
@@ -400,7 +400,7 @@ def create_vendor(request):
         return redirect('useradmin:dashboard')
     except Vendor.DoesNotExist:
         pass
-    
+
     if request.method == 'POST':
         title = request.POST.get('title')
         description = request.POST.get('description')
@@ -411,11 +411,11 @@ def create_vendor(request):
         authentic_rating = float(request.POST.get('authentic_rating', 5.0))
         days_return = int(request.POST.get('days_return', 7))
         warranty_period = int(request.POST.get('warranty_period', 12))
-        
+
         with transaction.atomic():
             import shortuuid
             vid = f"v-{shortuuid.uuid()[:10]}"
-            
+
             vendor = Vendor.objects.create(
                 vid=vid,
                 title=title,
@@ -429,7 +429,7 @@ def create_vendor(request):
                 warranty_period=warranty_period,
                 user=request.user
             )
-            
+
             if 'image' in request.FILES:
                 Image.objects.create(
                     image=request.FILES['image'],
@@ -438,8 +438,8 @@ def create_vendor(request):
                     object_id=vid,
                     is_primary=True
                 )
-        
+
         messages.success(request, _("Tài khoản vendor của bạn đã được tạo thành công"))
         return redirect('useradmin:dashboard')
-    
+
     return render(request, 'useradmin/create_vendor.html')
