@@ -26,7 +26,6 @@ urlpatterns = [
     path("ajax-add-review/<int:pid>/", ajax_add_review, name="ajax-add-review"),
     path("products/", product_list_view, name="product-list"),
     path("search/", search_view, name="search"),
-    path("product/<pid>/", product_detail_view, name="product-detail"),
     path("vendors/", vendor_list_view, name="vendor-list"),
     path("vendor/<vid>/", vendor_detail_view, name="vendor-detail"),
     path("search/", search_view, name="search"),

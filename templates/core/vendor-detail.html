@@ -1,6 +1,7 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 {% load i18n %}
+{% load discount_filters %}
 {% block content %}
     <main class="main">
         <div class="page-header breadcrumb-wrap">
@@ -157,9 +158,11 @@
                                     <a aria-label="{% trans 'Quick view' %}" class="action-btn" data-bs-toggle="modal" data-bs-target="#quickViewModal"><i class="fi-rs-eye"></i></a>
                                 </div>
                                 <div class="product-badges product-badges-position product-badges-mrg">
-                                    {% if p.get_precentage > 0 %}
+                                    {% with p|get_discount_percentage as discount %}
+                                        {% if discount %}
                                         <span class="hot">-{{p.get_precentage|floatformat:0}}%</span>
-                                    {% endif %}
+                                        {% endif %}
+                                    {% endwith %}
                                 </div>
                             </div>
                             <div class="product-content-wrap">

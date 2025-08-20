@@ -2,6 +2,7 @@
 {% load static %}
 {% load image_tags %}
 {% load currency %}
+{% load discount_filters %}
 {% load i18n %}
 {% block content %}
     <main class="main">
@@ -94,7 +95,11 @@
                                       <a href="{% url 'core:product-detail' p.pid %}" class="action-btn"><i class="fi-rs-eye"></i></a>
                                   </div>
                                   <div class="product-badges product-badges-position product-badges-mrg">
-                                      <span class="hot">-{{p.get_precentage|floatformat:0}}%</span>
+                                        {% with p|get_discount_percentage as discount %}
+                                            {% if discount %}
+                                            <span class="hot">-{{p.get_precentage|floatformat:0}}%</span>
+                                            {% endif %}
+                                        {% endwith %}
                                   </div>
                               </div>
                               <div class="product-content-wrap">
