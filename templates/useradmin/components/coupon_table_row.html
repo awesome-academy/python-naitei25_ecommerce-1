@@ -1,0 +1,75 @@
+<!-- templates/useradmin/components/coupon_table_row.html -->
+{% load i18n %}
+{% load humanize %}
+{% load coupon_tags %}
+
+<tr class="coupon-row{% if coupon.orders_count > 0 and not coupon.active %} soft-deleted{% endif %}" data-coupon-id="{{ coupon.id }}">
+    <td>
+        <strong class="coupon-code">{{ coupon.code }}</strong>
+        {% if coupon.apply_once_per_user %}
+            <br><small class="text-muted">
+                <i class="material-icons md-lock" style="font-size: 12px;"></i>
+                {% trans "One-time use" %}
+            </small>
+        {% endif %}
+        {% if coupon.orders_count > 0 and not coupon.active %}
+            <br><small class="text-danger">
+                <i class="material-icons md-delete" style="font-size: 12px;"></i>
+                {% trans "Soft deleted" %}
+            </small>
+        {% endif %}
+    </td>
+    <td>
+        <span class="discount-value">{{ coupon.discount|floatformat:1 }}%</span>
+    </td>
+    <td>
+        <span class="currency-value">${{ coupon.min_order_amount|floatformat:2|intcomma }}</span>
+    </td>
+    <td>
+        <span class="currency-value">${{ coupon.max_discount_amount|floatformat:2|intcomma }}</span>
+    </td>
+    <td>
+        <span class="badge bg-info usage-badge">
+            {{ coupon|coupon_usage_count }} {% trans "times" %}
+        </span>
+    </td>
+    <td>
+        <div class="expiry-info">
+            <!-- SỬA: Sử dụng filter custom để format date -->
+            <span class="expiry-date">{{ coupon|format_expiry_date }}</span>
+            
+            <!-- SỬA: Kiểm tra expired với filter đã sửa -->
+            {% if coupon|is_coupon_expired %}
+                <br><small class="text-danger">
+                    <i class="material-icons md-schedule" style="font-size: 12px;"></i>
+                    {% trans "Expired" %}
+                </small>
+            {% else %}
+                <!-- Hiển thị số ngày còn lại nếu chưa hết hạn -->
+                {% with days_left=coupon|days_until_expiry %}
+                    {% if days_left <= 7 and days_left > 0 %}
+                        <br><small class="text-warning">
+                            <i class="material-icons md-warning" style="font-size: 12px;"></i>
+                            {% blocktrans count days=days_left %}
+                                {{ days }} day left
+                            {% plural %}
+                                {{ days }} days left
+                            {% endblocktrans %}
+                        </small>
+                    {% elif days_left <= 0 %}
+                        <br><small class="text-danger">
+                            <i class="material-icons md-schedule" style="font-size: 12px;"></i>
+                            {% trans "Expires today" %}
+                        </small>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
+        </div>
+    </td>
+    <td>
+        {% coupon_status_badge coupon %}
+    </td>
+    <td>
+        {% coupon_actions_dropdown coupon %}
+    </td>
+</tr>

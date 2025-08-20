@@ -1,0 +1,30 @@
+<!-- templates/useradmin/components/coupon_empty_state.html -->
+{% load i18n %}
+
+<td colspan="8" class="text-center py-5 coupon-empty-state">
+    <div class="empty-state-content">
+        {% if has_filters %}
+            <i class="material-icons text-muted mb-3" style="font-size: 48px;">search_off</i>
+            <h5 class="text-muted">{% trans "No coupons found" %}</h5>
+            <p class="text-muted">{% trans "No coupons found matching your filters" %}</p>
+            <div class="mt-3">
+                {% if search_query %}
+                    <span class="badge bg-secondary me-2">{% trans "Search" %}: "{{ search_query }}"</span>
+                {% endif %}
+                {% if status_filter %}
+                    <span class="badge bg-primary me-2">{% trans "Status" %}: {{ status_filter|title }}</span>
+                {% endif %}
+            </div>
+            <a href="{% url 'useradmin:coupons' %}" class="btn btn-outline-secondary btn-sm mt-3">
+                <i class="material-icons md-clear"></i> {% trans "Clear filters" %}
+            </a>
+        {% else %}
+            <i class="material-icons text-muted mb-3" style="font-size: 48px;">local_offer</i>
+            <h5 class="text-muted">{% trans "No coupons yet" %}</h5>
+            <p class="text-muted">{% trans "Create your first discount coupon to start attracting customers" %}</p>
+            <a href="{% url 'useradmin:add_coupon' %}" class="btn btn-primary btn-sm mt-3">
+                <i class="material-icons md-add"></i> {% trans "Create your first coupon" %}
+            </a>
+        {% endif %}
+    </div>
+</td>

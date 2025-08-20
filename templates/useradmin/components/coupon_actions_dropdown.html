@@ -1,0 +1,35 @@
+<!-- templates/useradmin/components/coupon_actions_dropdown.html -->
+{% load i18n %}
+
+<div class="dropdown">
+    <button class="btn btn-light btn-sm dropdown-toggle" 
+            data-bs-toggle="dropdown"
+            aria-expanded="false"
+            aria-label="{% trans 'Actions for coupon' %} {{ coupon.code }}">
+        {% trans "Actions" %}
+    </button>
+    <div class="dropdown-menu">
+        <a class="dropdown-item" href="{% url 'useradmin:coupon_detail' coupon.id %}">
+            <i class="material-icons md-visibility"></i> {% trans "View Detail" %}
+        </a>
+        <a class="dropdown-item" href="{% url 'useradmin:edit_coupon' coupon.id %}">
+            <i class="material-icons md-edit"></i> {% trans "Edit" %}
+        </a>
+        <a class="dropdown-item" href="{% url 'useradmin:toggle_coupon_status' coupon.id %}">
+            {% if coupon.active %}
+                <i class="material-icons md-visibility_off"></i> {% trans "Deactivate" %}
+            {% else %}
+                <i class="material-icons md-visibility"></i> {% trans "Activate" %}
+            {% endif %}
+        </a>
+        <div class="dropdown-divider"></div>
+        <a class="dropdown-item text-danger delete-coupon-btn" 
+           href="#"
+           data-coupon-id="{{ coupon.id }}"
+           data-delete-url="{% url 'useradmin:delete_coupon' coupon.id %}"
+           data-bs-toggle="modal" 
+           data-bs-target="#deleteConfirmModal">
+            <i class="material-icons md-delete"></i> {% trans "Delete" %}
+        </a>
+    </div>
+</div>

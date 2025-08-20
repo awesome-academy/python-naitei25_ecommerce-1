@@ -17,7 +17,8 @@
         <!-- Template CSS -->
         <link href="{% static 'assets2/css/main.css' %}" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-
+        <link rel="stylesheet" href="{% static 'css/custom.css' %}">
+        {% block extra_css %}{% endblock %}
     </head>
 
     <body>
@@ -49,6 +50,12 @@
                         <a class="menu-link" href="{% url 'useradmin:orders' %}">
                             <i class="icon material-icons md-shopping_cart"></i>
                             <span class="text">{% trans "Orders" %}</span>
+                        </a>
+                    </li>
+                    <li class="menu-item {% if '/useradmin/coupons/' in request.path %}active{% endif %}">
+                        <a class="menu-link" href="{% url 'useradmin:coupons' %}">
+                            <i class="icon material-icons md-local_offer"></i>
+                            <span class="text">{% trans "Coupons" %}</span>
                         </a>
                     </li>
                     <li class="menu-item">
@@ -162,8 +169,8 @@
         <script src="{% static 'assets2/js/vendors/perfect-scrollbar.js' %}"></script>
         <script src="{% static 'assets2/js/vendors/jquery.fullscreen.min.js' %}"></script>
         <script src="{% static 'assets2/js/vendors/chart.js' %}"></script>
-        <script src="{% static 'assets2/js/main.js?v=1.1' %}" type="text/javascript"></script>
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <script src="{% static 'assets2/js/custom/alert-handler.js' %}"></script>
+        <script src="{% static 'assets2/js/main.js' %}?v=1.1" type="text/javascript"></script>
+        <script src="{% static 'js/main.js' %}"></script>
+        {% block extra_js %}{% endblock %}
     </body>
 </html>

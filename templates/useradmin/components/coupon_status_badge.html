@@ -1,0 +1,12 @@
+<!-- templates/useradmin/components/coupon_status_badge.html -->
+{% load i18n %}
+
+<span class="badge {{ badge_class }}">
+    {{ status_text }}
+</span>
+
+{% if status == 'expired' %}
+    <br><small class="text-danger">{{ status_text }}</small>
+{% elif status == 'inactive' %}
+    <br><small class="text-muted">{{ status_text }}</small>
+{% endif %}

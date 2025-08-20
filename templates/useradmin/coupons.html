@@ -1,0 +1,107 @@
+{% extends 'useradmin/base.html' %}
+{% load static %}
+{% load humanize %}
+{% load i18n %}
+{% load coupon_tags %}
+{% block content %}
+<section class="content-main">
+    <div class="content-header">
+        <div>
+            <h2 class="content-title card-title">{% trans "Coupon Management" %}</h2>
+            <p>{% trans "Manage your discount coupons" %}</p>
+        </div>
+        <div>
+            <a href="{% url 'useradmin:add_coupon' %}" class="btn btn-primary btn-sm rounded">
+                <i class="material-icons md-add"></i> {% trans "Create Coupon" %}
+            </a>
+        </div>
+    </div>
+    
+    <div class="card mb-4">
+        <header class="card-header">
+            {% coupon_search_filter search_query=search_query status_filter=status_filter %}
+        </header>
+        
+        <div class="card-body" id="coupon-list-container">
+            {% coupon_filter_indicator search_query=search_query status_filter=status_filter %}
+            
+            <div class="table-responsive">
+                <table class="table table-hover coupon-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">{% trans "Code" %}</th>
+                            <th scope="col">{% trans "Discount" %}</th>
+                            <th scope="col">{% trans "Min Order" %}</th>
+                            <th scope="col">{% trans "Max Discount" %}</th>
+                            <th scope="col">{% trans "Usage" %}</th>
+                            <th scope="col">{% trans "Expiry Date" %}</th>
+                            <th scope="col">{% trans "Status" %}</th>
+                            <th scope="col" class="text-end">{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for coupon in coupons %}
+                            {% coupon_table_row coupon %}
+                        {% empty %}
+                            <tr>
+                                {% coupon_empty_state search_query=search_query status_filter=status_filter %}
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            {% coupon_pagination coupons search_query=search_query status_filter=status_filter %}
+        </div>
+    </div>
+</section>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">
+                    <i class="material-icons md-warning text-danger"></i>
+                    {% trans "Confirm Deletion" %}
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <strong>{% trans "Warning!" %}</strong>
+                    {% trans "This action cannot be undone." %}
+                </div>
+                <p>{% trans "Are you sure you want to delete coupon" %} <strong id="coupon-code-display"></strong>?</p>
+                <div id="coupon-details" class="bg-light p-3 rounded d-none">
+                    <!-- Coupon details will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    {% trans "Cancel" %}
+                </button>
+                <button type="button" class="btn btn-danger" id="confirm-delete-btn">
+                    <span class="btn-text">
+                        <i class="material-icons md-delete"></i>
+                        {% trans "Delete Coupon" %}
+                    </span>
+                    <span class="btn-loading d-none">
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        {% trans "Deleting..." %}
+                    </span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block extra_js %}
+<script>
+    // Set CSRF token as global variable for JavaScript modules
+    window.csrfToken = '{{ csrf_token }}';
+</script>
+<script src="{% static 'js/coupon-management.js' %}"></script>
+<script src="{% static 'js/coupon-list.js' %}"></script>
+{% endblock %}

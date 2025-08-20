@@ -1,0 +1,40 @@
+<!-- templates/useradmin/components/coupon_search_filter.html -->
+{% load i18n %}
+
+<div class="row gx-3">
+    <div class="col-lg-4 col-md-6 me-auto">
+        <form method="GET" class="d-inline search-form">
+            <div class="input-group">
+                <input type="text" 
+                       name="search" 
+                       value="{{ search_query }}" 
+                       placeholder="{% trans 'Search coupon code...' %}" 
+                       class="form-control search-input"
+                       aria-label="{% trans 'Search coupons' %}" />
+                <button class="btn btn-outline-secondary" type="submit">
+                    <i class="material-icons md-search"></i>
+                </button>
+            </div>
+            {% if status_filter %}
+                <input type="hidden" name="status" value="{{ status_filter }}">
+            {% endif %}
+        </form>
+    </div>
+    <div class="col-lg-2 col-6 col-md-3">
+        <form method="GET" class="d-inline filter-form">
+            <select class="form-select status-filter" 
+                    name="status" 
+                    onchange="this.form.submit()"
+                    aria-label="{% trans 'Filter by status' %}">
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+            {% if search_query %}
+                <input type="hidden" name="search" value="{{ search_query }}">
+            {% endif %}
+        </form>
+    </div>
+</div>
