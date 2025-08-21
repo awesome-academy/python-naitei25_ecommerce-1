@@ -1,0 +1,21 @@
+<!-- templates/useradmin/components/coupon_filter_indicator.html -->
+{% load i18n %}
+
+{% if has_filters %}
+<div class="alert alert-info filter-indicator" role="alert">
+    <div class="d-flex align-items-center justify-content-between">
+        <div>
+            <strong>{% trans "Filtering results" %}:</strong>
+            {% if status_filter %}
+                <span class="badge bg-primary ms-2">{% trans "Status" %}: {{ status_filter|title }}</span>
+            {% endif %}
+            {% if search_query %}
+                <span class="badge bg-secondary ms-2">{% trans "Search" %}: "{{ search_query }}"</span>
+            {% endif %}
+        </div>
+        <a href="{% url 'useradmin:coupons' %}" class="btn btn-sm btn-outline-secondary">
+            <i class="material-icons md-clear"></i> {% trans "Clear filters" %}
+        </a>
+    </div>
+</div>
+{% endif %}
