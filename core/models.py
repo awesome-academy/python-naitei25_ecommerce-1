@@ -14,6 +14,7 @@ from django.contrib.auth.models import AbstractUser
 from userauths.models import User
 from . import constants as C
 from django.core.exceptions import ObjectDoesNotExist
+from django.utils.translation import gettext as _
 # Create your models here.
 def user_directory_path(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
@@ -91,12 +92,12 @@ class Vendor(models.Model):
     def banner_set(self):
         """Get all banner images for this vendor"""
         return Image.objects.filter(object_type='vendor_banner', object_id=self.vid)
-    
+
     @property
     def primary_image(self):
         """Get primary image for this vendor"""
         return Image.objects.filter(object_type='Vendor', object_id=self.vid, is_primary=True).first()
-    
+
     @property
     def primary_banner(self):
         """Get primary banner image for this vendor"""
@@ -125,31 +126,31 @@ class Vendor(models.Model):
                 print(f"Error getting banner URL for vendor {self.vid}: {e}")
                 return None
         return '/static/assets/imgs/vendor/vendor-banner-placeholder.jpg'
-    
+
     def get_default_image_url(self):
         """Get default image URL if no primary image exists"""
         return '/static/assets/imgs/vendor/vendor-placeholder.jpg'
-    
+
     def get_default_banner_url(self):
         """Get default banner URL if no primary banner exists"""
         return '/static/assets/imgs/vendor/vendor-banner-placeholder.jpg'
-    
+
     @property
     def display_image_url(self):
         """Get primary image URL or default if not exists"""
         return self.primary_image_url or self.get_default_image_url()
-    
+
     @property
     def display_banner_url(self):
         """Get primary banner URL or default if not exists"""
         return self.primary_banner_url or self.get_default_banner_url()
-    
+
     def add_image(self, image, alt_text=None, is_primary=False):
         """Add a new image for this vendor"""
         # Set all existing images as non-primary if this one is primary
         if is_primary:
             Image.objects.filter(object_type='Vendor', object_id=self.vid, is_primary=True).update(is_primary=False)
-        
+
         # Create new image
         return Image.objects.create(
             url=image,
@@ -158,13 +159,13 @@ class Vendor(models.Model):
             object_id=self.vid,
             is_primary=is_primary
         )
-    
+
     def add_banner(self, image, alt_text=None, is_primary=False):
         """Add a new banner image for this vendor"""
         # Set all existing banner images as non-primary if this one is primary
         if is_primary:
             Image.objects.filter(object_type='vendor_banner', object_id=self.vid, is_primary=True).update(is_primary=False)
-        
+
         # Create new banner image
         return Image.objects.create(
             url=image,
@@ -173,20 +174,20 @@ class Vendor(models.Model):
             object_id=self.vid,
             is_primary=is_primary
         )
-    
+
     def set_primary_image(self, image_id):
         """Set an existing image as primary"""
         # First, unset all primary images
         Image.objects.filter(object_type='Vendor', object_id=self.vid, is_primary=True).update(is_primary=False)
-        
+
         # Then set the selected image as primary
         return Image.objects.filter(id=image_id, object_type='Vendor', object_id=self.vid).update(is_primary=True)
-    
+
     def set_primary_banner(self, image_id):
         """Set an existing banner as primary"""
         # First, unset all primary banners
         Image.objects.filter(object_type='vendor_banner', object_id=self.vid, is_primary=True).update(is_primary=False)
-        
+
         # Then set the selected banner as primary
         return Image.objects.filter(id=image_id, object_type='vendor_banner', object_id=self.vid).update(is_primary=True)
 
@@ -265,12 +266,12 @@ class Category(models.Model):
     def image_set(self):
         """Get all images for this category"""
         return Image.objects.filter(object_type='Category', object_id=self.cid)
-    
+
     @property
     def primary_image(self):
         """Get primary image for this category"""
         return Image.objects.filter(object_type='Category', object_id=self.cid, is_primary=True).first()
-    
+
     @property
     def primary_image_url(self):
         """Get primary image URL for this category"""
@@ -282,7 +283,7 @@ class Category(models.Model):
                 print(f"Error getting image URL for category {self.cid}: {e}")
                 return None
         return None
-    
+
     @property
     def display_image_url(self):
         """Get primary image URL or default"""
@@ -308,8 +309,8 @@ class Product(models.Model):
     old_price = models.DecimalField(max_digits=C.MAX_DIGITS_AMOUNT, decimal_places=2, default=0.00)
     specifications = models.TextField(null=True, blank=True)
     type = models.CharField(max_length=C.MAX_LENGTH_TYPE, null=True, blank=True)
-    stock_count = models.CharField(max_length=C.MAX_LENGTH_STOCK_COUNT , null=True, blank=True)
-    life = models.CharField(max_length=C.MAX_LENGTH_LIFE, null=True, blank=True)
+    stock_count = models.PositiveIntegerField(default=0, help_text=_("Số lượng tồn kho"))
+    life = models.PositiveIntegerField(default=0, help_text="HSD")
     mfd = models.DateTimeField(null=True, blank=True)
     product_status = models.CharField(
         max_length=C.MAX_LENGTH_PRODUCT_STATUS,

@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load static %}
 <div class="table-responsive shopping-summery">
   <table class="table table-wishlist">
       <thead>
@@ -9,7 +10,6 @@
               <th>{% trans "Unit Price" %}</th>
               <th class="text-center">{% trans "Quantity" %}</th>
               <th>{% trans "Subtotal" %}</th>
-              <th>{% trans "Refresh" %}</th>
               <th class="end">{% trans "Remove" %}</th>
           </tr>
       </thead>
@@ -26,20 +26,20 @@
                   </h6>
               </td>
               <td class="price">
-                  <h4 class="text-body">${{ item.price|floatformat:2 }}</h4>
+                <h4 class="text-body">${{ item.price|floatformat:2 }}</h4>
               </td>
               <td class="text-center detail-info">
                   <div class="mr-15">
-                      <input type="number" class="w-25 product-qty-{{ product_id }}" value="{{ item.qty }}">
+                    <input type="number"
+                    class="w-25 product-qty"
+                    data-product="{{ product_id }}"
+                    value="{{ item.qty }}">
                   </div>
               </td>
               <td class="price">
-                  <h4 class="text-brand">${{ item.subtotal|floatformat:2 }}</h4>
-              </td>
-              <td class="action text-center">
-                  <button class="text-body update-product" data-product="{{ product_id }}">
-                      <i class="fi-rs-refresh"></i>
-                  </button>
+                <h4 class="text-brand subtotal-{{ product_id }}">
+                  ${{ item.subtotal|floatformat:2 }}
+                </h4>
               </td>
               <td class="action text-center">
                   <a class="text-body delete-product" style="border: none; background: none;" data-product="{{ product_id }}">
@@ -51,3 +51,8 @@
       </tbody>
   </table>
 </div>
+
+<script>
+  var updateCartUrl = "{% url 'core:update-cart' %}";
+</script>
+<script src="{% static 'assets/js/cart.js' %}"></script>
