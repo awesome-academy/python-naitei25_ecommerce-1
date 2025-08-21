@@ -1,6 +1,7 @@
 {% extends 'partials/base.html' %}
 {% load static %}
 {% load i18n %}
+{% load discount_filters %}
 {% block extra_css %}
   <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/10.0.3/styles/default.min.css">
   <link rel="stylesheet" href="{% static 'assets/css/prism.css' %}">
@@ -57,7 +58,11 @@
                                     </div>
                                     <div class="col-md-6 col-sm-12 col-xs-12">
                                         <div class="detail-info pr-30 pl-30">
-                                            <span class="stock-status out-stock"> -{{p.get_precentage|floatformat:0}}% </span>
+                                            {% with p|get_discount_percentage as discount %}
+                                                {% if discount %}
+                                                <span class="stock-status out-stock"> -{{p.get_precentage|floatformat:0}}% </span>
+                                                {% endif %}
+                                            {% endwith %}
                                             <h2 class="title-detail">{{p.title}}</h2>
                                             <div class="product-detail-rating">
                                                 <div class="product-rate-cover text-end">
@@ -71,7 +76,11 @@
                                                 <div class="product-price primary-color float-left">
                                                     <span>$</span> <span class="current-product-price-{{ p.pid }}">{{p.amount}}</span>
                                                     <span>
-                                                        <span class="save-price font-md color3 ml-15">{{p.get_precentage|floatformat:0}}% Off</span>
+                                                        {% with p|get_discount_percentage as discount %}
+                                                            {% if discount %}
+                                                            <span class="save-price font-md color3 ml-15">{{p.get_precentage|floatformat:0}}% Off</span>
+                                                            {% endif %}
+                                                        {% endwith %}
                                                     <span class="old-price font-md ml-15">${{p.old_price}}</span>
                                                     </span>
                                                 </div>
@@ -365,7 +374,11 @@
                                                             <a aria-label="Compare" class="action-btn small hover-up" href="shop-compare.html" tabindex="0"><i class="fi-rs-shuffle"></i></a>
                                                         </div>
                                                         <div class="product-badges product-badges-position product-badges-mrg">
-                                                          <span class="hot">-{{p.get_precentage|floatformat:0}}%</span>
+                                                            {% with p|get_discount_percentage as discount %}
+                                                                {% if discount %}
+                                                                <span class="hot">-{{p.get_precentage|floatformat:0}}%</span>
+                                                                {% endif %}
+                                                            {% endwith %}
                                                         </div>
                                                     </div>
                                                     <div class="product-content-wrap">
