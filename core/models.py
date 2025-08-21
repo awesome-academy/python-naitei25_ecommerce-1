@@ -78,6 +78,7 @@ class Vendor(models.Model):
         validators=[MinValueValidator(C.MIN), MaxValueValidator(C.WARRANTY_PERIOD_TIME_MONTH )]  # tối đa 5 năm
     )
     user = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    vendor_active = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
