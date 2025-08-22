@@ -38,4 +38,5 @@ urlpatterns = [
     path("checkout/cod/<int:oid>/accept/", cod_accept, name="cod-accept"),
     path("checkout/<int:oid>/", checkout, name="checkout"),
     path("orders/", order_list, name="orders"),
+    path("filter-products/", filter_product, name="filter-product"),
 ]

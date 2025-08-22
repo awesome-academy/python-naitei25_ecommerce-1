@@ -213,3 +213,4 @@ nhap.html
 createdb.sql
 core/fake_data.py
 static.zip
+.DS_Store
