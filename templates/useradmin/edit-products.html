@@ -3,18 +3,42 @@
 {% load humanize %}
 {% load i18n %}
 {{ form.media }}
+
 {% block content %}   
-<head>
-    <link rel="stylesheet" href="{% static 'css/custom.css' %}">
-</head>
 <section class="content-main">
+    <!-- Chặn truy cập edit cho sản phẩm deleted -->
+    {% if product.product_status == PRODUCT_STATUS_DELETED %}
+    <div class="alert alert-warning text-center">
+        <h4><i class="fas fa-exclamation-triangle"></i> {% trans "Product is Deleted" %}</h4>
+        <p>{% trans "This product has been deleted. Please restore it first to edit." %}</p>
+        <a href="{% url 'useradmin:dashboard-products' %}?show_deleted=true" class="btn btn-primary">
+            <i class="material-icons md-arrow_back"></i> {% trans "Back to Products" %}
+        </a>
+    </div>
+    {% else %}
     <form method="POST" enctype="multipart/form-data">
         <div class="row">
             <div class="col-9">
                 <div class="content-header">
-                    <h2 class="content-title">{% trans "Update Product" %}</h2>
-                    <div>
-                        <button class="btn btn-md rounded font-sm hover-up">{% trans "Publish" %} <i class="fas fa-check-circle ms-2"></i></button>
+                    <h2 class="content-title">
+                        {% trans "Update Product" %}
+                        <span class="badge ms-2 {% if product.product_status == PRODUCT_STATUS_PUBLISHED %}bg-success{% elif product.product_status == PRODUCT_STATUS_DRAFT %}bg-secondary{% elif product.product_status == PRODUCT_STATUS_DELETED %}bg-danger{% else %}bg-warning{% endif %}">
+                            {{ product.product_status|title }}
+                        </span>
+                    </h2>
+                    <div class="d-flex gap-2">
+                        {% if product.product_status == PRODUCT_STATUS_PUBLISHED %}
+                            <button type="submit" class="btn btn-primary btn-md rounded font-sm hover-up">
+                                {% trans "Update Product" %} <i class="fas fa-edit ms-2"></i>
+                            </button>
+                        {% else %}
+                            <button type="submit" class="btn btn-light btn-md rounded font-sm hover-up">
+                                {% trans "Save as Draft" %} <i class="fas fa-save ms-2"></i>
+                            </button>
+                            <button type="submit" name="publish" value="true" class="btn btn-primary btn-md rounded font-sm hover-up">
+                                {% trans "Publish Now" %} <i class="fas fa-check-circle ms-2"></i>
+                            </button>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -32,77 +56,115 @@
                         {% endif %}
                         
                         {% csrf_token %}
-                        <div class="mb-4">
-                            <label for="product_name" class="form-label">{% trans "Product title" %}</label>
-                            {{form.title}}
-                        </div>
                         
-                        <div class="mb-4">
-                            <label class="form-label">{% trans "Full description" %}</label>
-                            {{form.description}}
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-lg-4">
-                                <div class="mb-4">
-                                    <label class="form-label">{% trans "Selling price" %}</label>
-                                    <div class="row gx-2">
-                                        {{form.amount}}
+                        <!-- Disable form if product is deleted -->
+                        <fieldset {% if product.product_status == PRODUCT_STATUS_DELETED %}disabled{% endif %}>
+                            <div class="mb-4">
+                                <label for="product_name" class="form-label required-field">{% trans "Product title" %}</label>
+                                {{form.title}}
+                                {% if form.title.errors %}
+                                    <div class="text-danger small mt-1">{{ form.title.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label class="form-label">{% trans "Full description" %}</label>
+                                {{form.description}}
+                                {% if form.description.errors %}
+                                    <div class="text-danger small mt-1">{{ form.description.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">{% trans "Product Specifications" %}</label>
+                                {{form.specifications}}
+                                {% if form.specifications.errors %}
+                                    <div class="text-danger small mt-1">{{ form.specifications.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-lg-6">
+                                    <div class="mb-4">
+                                        <label class="form-label required-field">{% trans "Selling price (USD)" %}</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            {{form.amount}}
+                                        </div>
+                                        {% if form.amount.errors %}
+                                            <div class="text-danger small mt-1">{{ form.amount.errors.0 }}</div>
+                                        {% endif %}
+                                        {% if form.amount.value %}
+                                        <small class="text-muted">{% trans "Current" %}: ${{form.amount.value|floatformat:2}}</small>
+                                        {% endif %}
                                     </div>
-                                    {% if form.amount.value %}
-                                    <small class="text-muted">{% trans "Current" %}: ${{form.amount.value|floatformat:2}}</small>
-                                    {% endif %}
+                                </div>
+                                <div class="col-lg-6">
+                                    <div class="mb-4">
+                                        <label class="form-label">{% trans "Old price (USD)" %}</label>
+                                        <div class="input-group">
+                                            <span class="input-group-text">$</span>
+                                            {{form.old_price}}
+                                        </div>
+                                        {% if form.old_price.errors %}
+                                            <div class="text-danger small mt-1">{{ form.old_price.errors.0 }}</div>
+                                        {% endif %}
+                                        {% if form.old_price.value %}
+                                        <small class="text-muted">{% trans "Current" %}: ${{form.old_price.value|floatformat:2}}</small>
+                                        {% endif %}
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-lg-4">
-                                <div class="mb-4">
-                                    <label class="form-label">{% trans "Old price" %}</label>
-                                    {{form.old_price}}
-                                    {% if form.old_price.value %}
-                                    <small class="text-muted">{% trans "Current" %}: ${{form.old_price.value|floatformat:2}}</small>
-                                    {% endif %}
-                                </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">{% trans "Type" %}</label>
+                                {{form.type}}
+                                {% if form.type.errors %}
+                                    <div class="text-danger small mt-1">{{ form.type.errors.0 }}</div>
+                                {% endif %}
                             </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">{% trans "Currency" %}</label>
-                                <select class="form-select">
-                                    <option>USD</option>
-                                </select>
+
+                            <div class="mb-4">
+                                <label class="form-label required-field">{% trans "Stock" %}</label>
+                                {{form.stock_count}}
+                                {% if form.stock_count.errors %}
+                                    <div class="text-danger small mt-1">{{ form.stock_count.errors.0 }}</div>
+                                {% endif %}
+                                <small class="text-muted d-block">{% trans "Stock must be greater than 0 to publish" %}</small>
                             </div>
-                        </div>
 
-                        <div class="mb-4">
-                            <label class="form-label">{% trans "Type" %}</label>
-                            {{form.type}}
-                        </div>
+                            <div class="mb-4">
+                                <label class="form-label">{% trans "Life of Product" %}</label>
+                                {{form.life}}
+                                {% if form.life.errors %}
+                                    <div class="text-danger small mt-1">{{ form.life.errors.0 }}</div>
+                                {% endif %}
+                            </div>
 
-                        <div class="mb-4">
-                            <label class="form-label">{% trans "Stock" %}</label>
-                            {{form.stock_count}}
-                        </div>
+                            <div class="mb-4">
+                                <label class="form-label">{% trans "Manufactured Date" %}</label>
+                                {{form.mfd}}
+                                {% if form.mfd.errors %}
+                                    <div class="text-danger small mt-1">{{ form.mfd.errors.0 }}</div>
+                                {% endif %}
+                            </div>
 
-                        <div class="mb-4">
-                            <label class="form-label">{% trans "Life of Product" %}</label>
-                            {{form.life}}
-                        </div>
+                            <div class="mb-4">
+                                <label class="form-label">{% trans "Tags" %}</label>
+                                {{form.tags}}
+                                {% if form.tags.errors %}
+                                    <div class="text-danger small mt-1">{{ form.tags.errors.0 }}</div>
+                                {% endif %}
+                                <small class="text-muted">{% trans "Separate tag using comma" %}</small>
+                            </div>
 
-                        <div class="mb-4">
-                            <label class="form-label">{% trans "Manufactured Date" %}</label>
-                            {{form.mfd}}
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">{% trans "Tags" %}</label>
-                            {{form.tags}}
-                            <small class="text-muted">{% trans "Separate tag using comma" %}</small>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="form-label">{% trans "Digital Product" %}</label>
-                            <br>
-                            {{form.digital}}
-                            <small class="text-muted ms-2">{% trans "Check if only this is a digital product" %}</small>
-                        </div>
+                            <div class="mb-4">
+                                <label class="form-label">{% trans "Digital Product" %}</label>
+                                <br>
+                                {{form.digital}}
+                                <small class="text-muted ms-2">{% trans "Check if only this is a digital product" %}</small>
+                            </div>
+                        </fieldset>
                     </div>
                 </div>
             </div>
@@ -116,34 +178,75 @@
                         <div class="input-upload">
                             {% if primary_image %}
                                 <img src="{{ primary_image.image.url }}" alt="{{ primary_image.alt_text }}" 
-                                     class="product-upload-preview" />
+                                     class="product-upload-preview" style="max-width: 200px; max-height: 200px;" />
                             {% else %}
-                                <img src="{% static 'images/default-product.png' %}" alt="{% trans 'No image' %}" 
-                                     class="product-upload-preview" />
+                                <img src="{% static 'assets2/imgs/theme/upload.svg' %}" alt="{% trans 'Upload image' %}" />
                             {% endif %}
                             <div class="mt-3">
                                 {{ form.image }}
                             </div>
+                            {% if form.image.errors %}
+                                <div class="text-danger small mt-1">{{ form.image.errors.0 }}</div>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
                 <div class="card mb-4">
                     <div class="card-header">
-                        <h4>{% trans "Others" %}</h4>
+                        <h4>{% trans "Category" %}</h4>
                     </div>
                     <div class="card-body">
-                        <div class="row gx-2">
-                            <div class="col-sm-6 mb-3">
-                                <label class="form-label">{% trans "Category" %}</label>
-                                {{form.category}}
+                        <fieldset {% if product.product_status == PRODUCT_STATUS_DELETED %}disabled{% endif %}>
+                            <div class="row gx-2">
+                                <div class="col-sm-12 mb-3">
+                                    <label class="form-label required-field">{% trans "Category" %}</label>
+                                    {{form.category}}
+                                    {% if form.category.errors %}
+                                        <div class="text-danger small mt-1">{{ form.category.errors.0 }}</div>
+                                    {% endif %}
+                                </div>
                             </div>
-                        </div>
+                        </fieldset>
                     </div>
                     <br>
                 </div>
-                <button class="btn mt-3 btn-md rounded font-sm hover-up" type="submit">{% trans "Update Product" %}</button>
+                
+                {% if product.product_status != PRODUCT_STATUS_DELETED %}
+                <div class="d-flex flex-column gap-2">
+                    {% if product.product_status == PRODUCT_STATUS_PUBLISHED %}
+                        <!-- Chỉ 1 nút Update cho sản phẩm đã published -->
+                        <button class="btn btn-primary btn-md rounded font-sm hover-up" type="submit">
+                            {% trans "Update Product" %} <i class="fas fa-edit ms-2"></i>
+                        </button>
+                    {% else %}
+                        <!-- 2 nút cho draft: Save Draft và Publish -->
+                        <button class="btn btn-light btn-md rounded font-sm hover-up" type="submit">
+                            {% trans "Save as Draft" %} <i class="fas fa-save ms-2"></i>
+                        </button>
+                        <button class="btn btn-primary btn-md rounded font-sm hover-up" type="submit" name="publish" value="true">
+                            {% trans "Publish Product" %} <i class="fas fa-check-circle ms-2"></i>
+                        </button>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="alert product-deleted-warning">
+                    <p class="mb-2">
+                        <i class="fas fa-info-circle"></i>
+                        {% trans "Product is deleted" %}
+                    </p>
+                    <a href="{% url 'useradmin:dashboard-restore-products' product.pid %}" 
+                       class="btn btn-success btn-sm">
+                        <i class="fas fa-undo me-1"></i>{% trans "Restore" %}
+                    </a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </form>
+    {% endif %}
 </section>
 {% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/product-management.js' %}"></script>
+{% endblock %}

@@ -11,15 +11,29 @@ from .constants import (
 )
 
 class AddProductForm(forms.ModelForm):
-    title = forms.CharField(widget=forms.TextInput(attrs={'placeholder': _("Product Title"), "class": FORM_CONTROL_CLASS}))
-    description = forms.CharField(widget=forms.Textarea(attrs={'placeholder': _("Product Description"), "class": FORM_CONTROL_CLASS}))
+    title = forms.CharField(
+        required=True,
+        widget=forms.TextInput(attrs={
+            'placeholder': _("Product Title"), 
+            "class": FORM_CONTROL_CLASS
+        })
+    )
+    description = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'placeholder': _("Product Description (optional)"), 
+            "class": FORM_CONTROL_CLASS,
+            'rows': 4
+        })
+    )
     amount = forms.DecimalField(
         required=True,
-        min_value=Decimal(str(MIN_PRODUCT_PRICE)),
+        min_value=Decimal('0.01'),
         widget=forms.NumberInput(attrs={
             'placeholder': _("Sale Price"), 
             'class': FORM_CONTROL_CLASS,
-            'step': str(MIN_PRICE_STEP)
+            'step': '0.01',
+            'min': '0.01'
         })
     )
     old_price = forms.DecimalField(
@@ -27,18 +41,64 @@ class AddProductForm(forms.ModelForm):
         max_digits=MAX_DIGITS_DECIMAL,
         required=False,
         widget=forms.NumberInput(attrs={
-            'placeholder': _("Old Price"),
+            'placeholder': _("Old Price (optional)"),
             'class': FORM_CONTROL_CLASS,
-            'step': str(MIN_PRICE_STEP),
-            'min': str(MIN_AMOUNT_VALUE)
+            'step': '0.01',
+            'min': '0'
         })
     )
-    type = forms.CharField(widget=forms.TextInput(attrs={'placeholder': _("Type (e.g., Organic Cream)"), "class": FORM_CONTROL_CLASS}))
-    stock_count = forms.CharField(widget=forms.NumberInput(attrs={'placeholder': _("Stock Count"), "class": FORM_CONTROL_CLASS}))
-    life = forms.CharField(widget=forms.TextInput(attrs={'placeholder': _("Product Shelf Life"), "class": FORM_CONTROL_CLASS}))
-    mfd = forms.DateTimeField(widget=forms.DateTimeInput(attrs={'placeholder': _("Manufacture Date (YYYY-MM-DD)"), "class": FORM_CONTROL_CLASS}))
-    tags = forms.CharField(widget=forms.TextInput(attrs={'placeholder': _("Tags (comma-separated)"), "class": FORM_CONTROL_CLASS}))
-    image = forms.ImageField(widget=forms.FileInput(attrs={"class": FORM_CONTROL_CLASS}))
+    specifications = forms.CharField(
+        required=False,
+        widget=forms.Textarea(attrs={
+            'placeholder': _("Product Specifications (optional)"), 
+            "class": FORM_CONTROL_CLASS,
+            'rows': 3
+        })
+    )
+    type = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': _("Type (e.g., Organic Cream) - optional"), 
+            "class": FORM_CONTROL_CLASS
+        })
+    )
+    stock_count = forms.IntegerField(
+        required=True,
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            'placeholder': _("Stock Count"), 
+            "class": FORM_CONTROL_CLASS,
+            'min': '0'
+        })
+    )
+    life = forms.IntegerField(
+        required=False,
+        min_value=0,
+        widget=forms.NumberInput(attrs={
+            'placeholder': _("Product Life (days) - optional"), 
+            "class": FORM_CONTROL_CLASS,
+            'min': '0'
+        })
+    )
+    mfd = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(attrs={
+            'placeholder': _("Manufacture Date (optional)"), 
+            "class": FORM_CONTROL_CLASS,
+            'type': 'datetime-local'
+        })
+    )
+    tags = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': _("Tags (comma-separated, optional)"), 
+            "class": FORM_CONTROL_CLASS
+        })
+    )
+    image = forms.ImageField(
+        required=False,
+        widget=forms.FileInput(attrs={"class": FORM_CONTROL_CLASS})
+    )
 
     class Meta:
         model = Product
@@ -60,9 +120,39 @@ class AddProductForm(forms.ModelForm):
 
     def clean_amount(self):
         amount = self.cleaned_data.get('amount')
-        if amount is None or amount <= MIN_AMOUNT_VALUE:
-            raise forms.ValidationError(_("Price must be greater than {}").format(MIN_AMOUNT_VALUE))
+        if amount is None or amount <= 0:
+            raise forms.ValidationError(_("Price must be greater than 0"))
         return amount
+
+    def clean_stock_count(self):
+        stock_count = self.cleaned_data.get('stock_count')
+        if stock_count is None or stock_count < 0:
+            raise forms.ValidationError(_("Stock count cannot be negative"))
+        return stock_count
+
+    def clean_old_price(self):
+        old_price = self.cleaned_data.get('old_price')
+        if old_price and old_price < 0:
+            raise forms.ValidationError(_("Old price cannot be negative"))
+        
+        return old_price or 0.00
+
+    def clean_life(self):
+        life = self.cleaned_data.get('life')
+        # Nếu life là chuỗi rỗng hoặc None, trả về 0 (default)
+        if life == '' or life is None:
+            return 0
+        # Nếu life là số âm, báo lỗi
+        if life < 0:
+            raise forms.ValidationError(_("Product life cannot be negative"))
+        return life
+
+    def clean_mfd(self):
+        mfd = self.cleaned_data.get('mfd')
+        # Kiểm tra nếu mfd là trong tương lai
+        if mfd and mfd > timezone.now():
+            raise forms.ValidationError(_("Manufacture date cannot be in the future"))
+        return mfd
 
 class CouponForm(forms.ModelForm):
     class Meta:

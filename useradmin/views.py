@@ -15,6 +15,14 @@ from django.utils.translation import gettext as _
 import datetime
 from .decorators import vendor_required, vendor_profile_required, vendor_auth_required
 from django.utils import timezone
+from core.constants import (
+    PRODUCT_STATUS_DELETED,
+    PRODUCT_STATUS_DRAFT, 
+    PRODUCT_STATUS_PUBLISHED,
+    PRODUCT_STATUS_DISABLED,
+    PRODUCT_STATUS_REJECTED,
+    PRODUCT_STATUS_IN_REVIEW
+)
 
 @login_required
 def dashboard(request):
@@ -79,11 +87,18 @@ def dashboard(request):
 def products(request, vendor):
     sort_by = request.GET.get('sort', 'title')
     order = request.GET.get('order', 'asc')
+    show_deleted = request.GET.get('show_deleted', 'false') == 'true'
 
     if order == 'desc':
         sort_by = '-' + sort_by
 
-    all_products = Product.objects.filter(vendor=vendor).annotate(
+    # Filter products based on show_deleted parameter
+    if show_deleted:
+        all_products = Product.objects.filter(vendor=vendor)
+    else:
+        all_products = Product.objects.filter(vendor=vendor).exclude(product_status=PRODUCT_STATUS_DELETED)
+
+    all_products = all_products.annotate(
         display_price=Cast(
             Coalesce('amount', Value(0)),
             output_field=DecimalField(max_digits=MAX_DIGITS_DECIMAL, decimal_places=DECIMAL_PLACES)
@@ -114,7 +129,14 @@ def products(request, vendor):
         "all_categories": all_categories,
         'sort_by': request.GET.get('sort', 'title'),
         'order': request.GET.get('order', 'asc'),
+        'show_deleted': show_deleted,
         'vendor': vendor,
+        'PRODUCT_STATUS_DELETED': PRODUCT_STATUS_DELETED,
+        'PRODUCT_STATUS_DRAFT': PRODUCT_STATUS_DRAFT,
+        'PRODUCT_STATUS_PUBLISHED': PRODUCT_STATUS_PUBLISHED,
+        'PRODUCT_STATUS_DISABLED': PRODUCT_STATUS_DISABLED,
+        'PRODUCT_STATUS_REJECTED': PRODUCT_STATUS_REJECTED,
+        'PRODUCT_STATUS_IN_REVIEW': PRODUCT_STATUS_IN_REVIEW,
     }
     return render(request, "useradmin/products.html", context)
 
@@ -123,13 +145,39 @@ def products(request, vendor):
 def add_product(request, vendor):
     if request.method == "POST":
         form = AddProductForm(request.POST, request.FILES)
+        
+        # Kiểm tra xem có nhấn nút Publish không
+        is_publish = 'publish' in request.POST
+        
         if form.is_valid():
             with transaction.atomic():
                 product = form.save(commit=False)
                 product.vendor = vendor
+                
+                # Xử lý publish logic
+                if is_publish:
+                    # Kiểm tra điều kiện publish
+                    if product.amount > 0 and product.stock_count > 0:
+                        product.status = True
+                        product.in_stock = True
+                        product.product_status = PRODUCT_STATUS_PUBLISHED
+                        success_message = f"Product '{product.title}' has been published successfully!"
+                    else:
+                        product.status = False
+                        product.in_stock = False
+                        product.product_status = PRODUCT_STATUS_DRAFT
+                        success_message = f"Product '{product.title}' saved as draft. Please set price and stock to publish."
+                        messages.warning(request, "Product saved as draft. Price and stock must be greater than 0 to publish.")
+                else:
+                    # Lưu thành draft
+                    product.status = False
+                    product.in_stock = False  
+                    product.product_status = PRODUCT_STATUS_DRAFT
+                    success_message = f"Product '{product.title}' saved as draft"
+                
                 product.save()
-                form.save_m2m()
 
+                # Xử lý upload ảnh
                 if 'image' in request.FILES:
                     Image.objects.create(
                         image=request.FILES['image'],
@@ -139,14 +187,22 @@ def add_product(request, vendor):
                         is_primary=True
                     )
 
-            messages.success(request, f"Product '{product.title}' added successfully")
+            messages.success(request, success_message)
             return redirect("useradmin:dashboard-products")
+        else:
+            if is_publish:
+                messages.error(request, "Cannot publish product. Please fix the errors below.")
+            else:
+                messages.error(request, "Cannot save product. Please fix the errors below.")
     else:
         form = AddProductForm()
 
     context = {
         'form': form,
         'vendor': vendor,
+        'PRODUCT_STATUS_DELETED': PRODUCT_STATUS_DELETED,
+        'PRODUCT_STATUS_DRAFT': PRODUCT_STATUS_DRAFT,
+        'PRODUCT_STATUS_PUBLISHED': PRODUCT_STATUS_PUBLISHED,
     }
     return render(request, "useradmin/add-products.html", context)
 
@@ -170,12 +226,42 @@ def edit_product(request, pid, vendor):
 
     if request.method == "POST":
         form = AddProductForm(request.POST, request.FILES, instance=product)
+        
+        # Kiểm tra xem có nhấn nút Publish không
+        is_publish = 'publish' in request.POST
+        
         if form.is_valid():
             with transaction.atomic():
                 new_form = form.save(commit=False)
                 new_form.vendor = vendor
+                
+                # Xử lý publish logic
+                if is_publish:
+                    if new_form.amount > 0 and new_form.stock_count > 0:
+                        new_form.status = True
+                        new_form.in_stock = True
+                        new_form.product_status = PRODUCT_STATUS_PUBLISHED
+                        success_message = f"Product '{new_form.title}' has been published successfully!"
+                    else:
+                        new_form.status = False
+                        new_form.in_stock = False
+                        new_form.product_status = PRODUCT_STATUS_DRAFT
+                        success_message = f"Product '{new_form.title}' saved as draft. Please set price and stock to publish."
+                        messages.warning(request, "Product saved as draft. Price and stock must be greater than 0 to publish.")
+                else:
+                    # Nếu đã published trước đó, giữ nguyên
+                    if product.product_status == PRODUCT_STATUS_PUBLISHED:
+                        new_form.status = True
+                        new_form.in_stock = True
+                        new_form.product_status = PRODUCT_STATUS_PUBLISHED
+                        success_message = f"Product '{new_form.title}' updated successfully"
+                    else:
+                        new_form.status = False
+                        new_form.in_stock = False
+                        new_form.product_status = PRODUCT_STATUS_DRAFT
+                        success_message = f"Product '{new_form.title}' saved as draft"
+                
                 new_form.save()
-                form.save_m2m()
 
                 if 'image' in request.FILES:
                     if primary_image:
@@ -189,8 +275,13 @@ def edit_product(request, pid, vendor):
                         is_primary=True
                     )
 
-            messages.success(request, f"Product '{product.title}' updated successfully")
+            messages.success(request, success_message)
             return redirect("useradmin:dashboard-products")
+        else:
+            if is_publish:
+                messages.error(request, "Cannot publish product. Please fix the errors below.")
+            else:
+                messages.error(request, "Cannot save product. Please fix the errors below.")
     else:
         form = AddProductForm(instance=product)
 
@@ -199,6 +290,9 @@ def edit_product(request, pid, vendor):
         'product': product,
         'primary_image': primary_image,
         'vendor': vendor,
+        'PRODUCT_STATUS_DELETED': PRODUCT_STATUS_DELETED,
+        'PRODUCT_STATUS_DRAFT': PRODUCT_STATUS_DRAFT,
+        'PRODUCT_STATUS_PUBLISHED': PRODUCT_STATUS_PUBLISHED,
     }
     return render(request, "useradmin/edit-products.html", context)
 
@@ -214,7 +308,7 @@ def delete_product(request, pid, vendor):
 
         product.status = False
         product.in_stock = False
-        product.product_status = "deleted"
+        product.product_status = PRODUCT_STATUS_DELETED
         product.save()
 
         messages.success(request, f"Product '{product.title}' has been marked as deleted")
@@ -633,3 +727,27 @@ def toggle_coupon_status(request, vendor, coupon_id):
     messages.success(request, _("Coupon '{}' has been {}!").format(coupon.code, status))
     
     return redirect('useradmin:coupons')
+
+@login_required
+@vendor_auth_required()
+def restore_product(request, pid, vendor):
+    """Restore a soft-deleted product"""
+    try:
+        product = Product.objects.get(pid=pid, vendor=vendor)
+
+        if product.product_status != PRODUCT_STATUS_DELETED:
+            messages.warning(request, f"Product '{product.title}' is not deleted.")
+            return redirect("useradmin:dashboard-products")
+
+        # Restore product as draft
+        product.status = False
+        product.in_stock = False
+        product.product_status = PRODUCT_STATUS_DRAFT
+        product.save()
+
+        messages.success(request, f"Product '{product.title}' has been restored as draft.")
+        return redirect("useradmin:dashboard-products")
+
+    except Product.DoesNotExist:
+        messages.error(request, "Product not found.")
+        return redirect("useradmin:dashboard-products")
