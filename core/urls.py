@@ -42,4 +42,5 @@ urlpatterns = [
     # Dashboard URL
     path("dashboard/", customer_dashboard, name="dashboard"),
     path("make-default-address/", make_address_default, name="make-default-address"),
+    path("filter-products/", filter_product, name="filter-product"),
 ]

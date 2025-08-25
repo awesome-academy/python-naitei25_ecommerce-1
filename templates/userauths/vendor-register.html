@@ -1,0 +1,104 @@
+{% extends 'partials/base.html' %}
+{% load i18n %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">{% trans "Vendor Registration" %}</h2>
+
+    <form method="post" enctype="multipart/form-data" class="needs-validation">
+        {% csrf_token %}
+        
+        <!-- Hiển thị lỗi form tổng -->
+        {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+        {% endif %}
+
+        <!-- Logo -->
+        <div class="mb-3">
+            {{ form.image.label_tag }}
+            {{ form.image }}
+            {% if form.image.errors %}
+                <div class="text-danger">{{ form.image.errors }}</div>
+            {% endif %}
+        </div>
+
+        <!-- Từng field -->
+        <div class="mb-3">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {% if form.title.errors %}
+                <div class="text-danger">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {% if form.description.errors %}
+                <div class="text-danger">{{ form.description.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.address.label_tag }}
+            {{ form.address }}
+            {% if form.address.errors %}
+                <div class="text-danger">{{ form.address.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.contact.label_tag }}
+            {{ form.contact }}
+            {% if form.contact.errors %}
+                <div class="text-danger">{{ form.contact.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                {{ form.chat_resp_time.label_tag }}
+                {{ form.chat_resp_time }}
+                {% if form.chat_resp_time.errors %}
+                    <div class="text-danger">{{ form.chat_resp_time.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-6 mb-3">
+                {{ form.shipping_on_time.label_tag }}
+                {{ form.shipping_on_time }}
+                {% if form.shipping_on_time.errors %}
+                    <div class="text-danger">{{ form.shipping_on_time.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                {{ form.authentic_rating.label_tag }}
+                {{ form.authentic_rating }}
+                {% if form.authentic_rating.errors %}
+                    <div class="text-danger">{{ form.authentic_rating.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.days_return.label_tag }}
+                {{ form.days_return }}
+                {% if form.days_return.errors %}
+                    <div class="text-danger">{{ form.days_return.errors }}</div>
+                {% endif %}
+            </div>
+            <div class="col-md-4 mb-3">
+                {{ form.warranty_period.label_tag }}
+                {{ form.warranty_period }}
+                {% if form.warranty_period.errors %}
+                    <div class="text-danger">{{ form.warranty_period.errors }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">{% trans "Register Vendor" %}</button>
+    </form>
+</div>
+{% endblock %}

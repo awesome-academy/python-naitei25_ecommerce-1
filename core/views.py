@@ -42,8 +42,12 @@ from paypal.standard.forms import PayPalPaymentsForm
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 
-
-
+from django.db.models import Min, Max
+from decimal import Decimal, InvalidOperation
+from utils.params import to_decimal, getlist
+from typing import Optional, Tuple
+from django.http import HttpRequest
+from dataclasses import dataclass
 def index(request):
     # Base query: các sản phẩm đã publish
     base_query = Product.objects.filter(product_status=C.STATUS_PUBLISHED).order_by("-pid")
@@ -258,16 +262,6 @@ def ajax_add_review(request, pid):
         'average_reviews': average_reviews
        }
     )
-def product_list_view(request):
-    products = Product.objects.filter(product_status="published").order_by("-pid")
-    tags = Tag.objects.all().order_by("-id")[:TAG_LIMIT]
-
-    context = {
-        "products":products,
-        "tags":tags,
-    }
-
-    return render(request, 'core/product-list.html', context)
 
 def about_us(request):
     return render(request, "core/about_us.html")
@@ -727,7 +721,6 @@ def get_rating_counts(product):
     return results
 
 
-
 @require_POST
 @login_required
 def cod_checkout(request):
@@ -824,3 +817,108 @@ def cod_accept(request, oid):
 def order_list(request):
     orders = CartOrder.objects.filter(user=request.user).order_by('-order_date')
     return render(request, "core/order_list.html", {"orders": orders})
+def build_products_qs(request):
+    """Trả về queryset đã áp dụng các filter từ URL."""
+    categories = getlist(request.GET, "category")  # ✅
+    vendors    = getlist(request.GET, "vendor")   
+    min_price  = to_decimal(request.GET.get("min_price"))
+    max_price  = to_decimal(request.GET.get("max_price"))
+
+    qs = Product.objects.filter(product_status="published")
+
+    if min_price is not None:
+        qs = qs.filter(amount__gte=min_price)
+    if max_price is not None:
+        qs = qs.filter(amount__lte=max_price)
+    if categories:
+        qs = qs.filter(category_id__in=categories)
+    if vendors:
+        qs = qs.filter(vendor_id__in=vendors)
+
+    return qs.select_related("category", "vendor").order_by("-pid")
+# --------------------------------
+def _get_int(request: HttpRequest, key: str, default: int, *, min_value: Optional[int]=None, max_value: Optional[int]=None) -> int:
+    """Đọc param int an toàn từ query string: rỗng/sai -> default; kẹp min/max nếu có."""
+    try:
+        v = int(request.GET.get(key, default))
+    except (TypeError, ValueError):
+        v = default
+    if min_value is not None:
+        v = max(v, min_value)
+    if max_value is not None:
+        v = min(v, max_value)
+    return v
+
+@dataclass(frozen=True)
+class PaginationParams:
+    page: int
+    per_page: int
+
+def _get_pagination_params(request: HttpRequest):
+    page = _get_int(request, "page", DEFAULT_PAGE, min_value=1)
+    per_page = _get_int(request, "per_page", PRODUCTS_PER_PAGE, min_value=1, max_value=100)
+    return page, per_page
+
+def _build_sidebar_context():
+    """Lấy các dữ liệu cố định cho sidebar/filter."""
+    tags = Tag.objects.all().order_by("-id")[:TAG_LIMIT]
+    categories_all = Category.objects.all().order_by("title")
+    vendors_all = Vendor.objects.all().order_by("title")
+    min_max_price = Product.objects.aggregate(Min("amount"), Max("amount"))
+    return {
+        "tags": tags,
+        "categories": categories_all,
+        "vendors": vendors_all,
+        "min_max_price": min_max_price,
+    }
+
+def product_list_view(request):
+    # 1) Sidebar/filter data
+    tags = Tag.objects.all().order_by("-id")[:TAG_LIMIT]
+    categories_all = Category.objects.all().order_by("title")
+    vendors_all = Vendor.objects.all().order_by("title")
+    min_max_price = Product.objects.aggregate(Min("amount"), Max("amount"))
+
+    # 2) Lọc sản phẩm
+    qs = build_products_qs(request)
+
+    # 3) Phân trang
+    page_number, per_page = _get_pagination_params(request)
+    paginator = Paginator(qs, per_page)
+    page_obj  = paginator.get_page(page_number)
+
+    # 4) Context & render
+    context = {
+        "products": page_obj,
+        "page_obj": page_obj,
+        "tags": tags,
+        "categories": categories_all,
+        "vendors": vendors_all,
+        "min_max_price": min_max_price,
+    }
+    return render(request, "core/product-list.html", context)
+
+
+def filter_product(request):
+    # 1) Lọc sản phẩm dùng chung
+    qs = build_products_qs(request)
+
+    # 2) Phân trang
+    page_number, per_page = _get_pagination_params(request)
+    paginator = Paginator(qs, per_page)
+    page_obj  = paginator.get_page(page_number)
+
+    # 3) Render partial
+    html = render_to_string(
+        "core/async/product-list.html",
+        {"products": page_obj, "page_obj": page_obj},
+        request=request,
+    )
+
+    return JsonResponse({
+        "data": html,
+        "count": paginator.count,
+        "page": page_obj.number,
+        "has_next": page_obj.has_next(),
+        "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
+    })

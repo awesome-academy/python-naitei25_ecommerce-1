@@ -215,3 +215,4 @@ core/fake_data.py
 static.zip
 media/
 
+.DS_Store
