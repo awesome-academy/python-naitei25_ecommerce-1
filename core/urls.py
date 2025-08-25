@@ -45,6 +45,12 @@ urlpatterns = [
     path("filter-products/", filter_product, name="filter-product"),
     
     #Tags
-    path("products/tag/<slug:tag_slug>/", tag_list, name="tags")
+    path("products/tag/<slug:tag_slug>/", tag_list, name="tags"),
+    path("wishlist/", wishlist_view, name="wishlist"),
+    path("add-to-wishlist/", add_to_wishlist, name="add-to-wishlist"),
+    path("api/wishlist-pids/", wishlist_pids, name="wishlist-pids"),
+    path("remove-from-wishlist/", remove_wishlist, name="remove-from-wishlist"),
+
+
 ]
 

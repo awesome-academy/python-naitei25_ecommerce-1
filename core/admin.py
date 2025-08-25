@@ -5,7 +5,7 @@ from django.contrib import admin
 from .models import (
     Address, Image, Vendor, Coupon, CouponUser,
     Category, Product, ProductReview, ReturnRequest,
-    CartOrder, CartOrderProducts
+    CartOrder, CartOrderProducts, wishlist_model
 )
 @admin.register(Address)
 class AddressAdmin(admin.ModelAdmin):
@@ -81,5 +81,10 @@ class CartOrderAdmin(admin.ModelAdmin):
 class CartOrderProductsAdmin(admin.ModelAdmin):
     list_display = ('order', 'item', 'qty', 'price', 'total')
     search_fields = ('order__user__username', 'item')
-# Register your models here.
+@admin.register(wishlist_model)
+class WishlistAdmin(admin.ModelAdmin):
+    list_display = ("user", "product", "date")     # khớp với model
+    search_fields = ("user__username", "product__title")
+    list_select_related = ("user", "product")
+    ordering = ("-date",)
 

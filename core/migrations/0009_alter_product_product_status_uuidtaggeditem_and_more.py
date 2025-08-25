@@ -10,7 +10,7 @@ class Migration(migrations.Migration):
     dependencies = [
         ("contenttypes", "0002_remove_content_type_name"),
         ("core", "0008_merge_20250824_1548"),
-        ("taggit", "0008_alter_taggeditem_object_id"),
+        ("taggit", "0006_rename_taggeditem_content_type_object_id_taggit_tagg_content_8fc721_idx"),
     ]
 
     operations = [

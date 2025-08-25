@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.http import JsonResponse
 from urllib3 import request
+from django.http import JsonResponse, HttpResponseBadRequest
 from .models import Product
 from django.template.loader import render_to_string
 from django.db.models import Avg, Count
@@ -41,6 +42,7 @@ from django.views.decorators.csrf import csrf_exempt
 from paypal.standard.forms import PayPalPaymentsForm
 from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
+from django.core import serializers
 
 from django.db.models import Min, Max
 from decimal import Decimal, InvalidOperation
@@ -939,3 +941,61 @@ def tag_list(request, tag_slug=None):
     }
     
     return render(request, "core/tag.html", context)
+@login_required
+def wishlist_view(request):
+    wishlist = (wishlist_model.objects
+                .filter(user=request.user)
+                .select_related('product')
+                .order_by('-date'))
+    context = {"w": wishlist}
+    return render(request, "core/wishlist.html", context)
+@login_required
+def add_to_wishlist(request):
+    # FE đang gửi param tên "id" nhưng giá trị thực là pid
+    product_pid = (request.GET.get('id') or "").strip()
+    if not product_pid:
+        return HttpResponseBadRequest("Missing product id")
+
+    # Lấy product theo pid (primary key)
+    product = get_object_or_404(Product, pk=product_pid)
+
+    # Tránh tạo trùng wishlist
+    obj, created = wishlist_model.objects.get_or_create(
+        user=request.user,
+        product=product,
+    )
+
+    # Đếm lại số wishlist để hiển thị badge
+    count = wishlist_model.objects.filter(user=request.user).count()
+
+    return JsonResponse({
+        "bool": True,
+        "status": "created" if created else "exists",
+        "pid": product.pid,
+        "title": product.title,
+        "count": count,
+    })
+@login_required
+def wishlist_pids(request):
+    pids = list(
+        wishlist_model.objects
+        .filter(user=request.user)
+        .values_list('product__pid', flat=True)
+    )
+    return JsonResponse({"pids": pids})
+@login_required
+def remove_wishlist(request):
+    pid = request.GET['pid']
+    wishlist = wishlist_model.objects.filter(user=request.user)
+    wishlist_d = wishlist_model.objects.get(id=pid)
+    delete_product = wishlist_d.delete()
+    
+    context = {
+        "bool":True,
+        "w":wishlist
+    }
+    wishlist_json = serializers.serialize('json', wishlist)
+    t = render_to_string('core/async/wishlist-list.html', context)
+    return JsonResponse({'data':t,'w':wishlist_json})
+
+
