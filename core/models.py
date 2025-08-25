@@ -3,6 +3,7 @@ from shortuuid.django_fields import ShortUUIDField
 from django.utils.html import mark_safe
 from django.conf import settings
 from taggit.managers import TaggableManager
+from taggit.models import GenericTaggedItemBase, TagBase, Tag
 from django_ckeditor_5.fields import CKEditor5Field
 from django.utils import timezone
 from django.core.validators import MinValueValidator, MaxValueValidator
@@ -15,6 +16,27 @@ from userauths.models import User
 from . import constants as C
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import gettext as _
+
+#Override truong object_id --> charfield trong tags
+class UUIDTaggedItem(GenericTaggedItemBase):
+    tag = models.ForeignKey(
+        Tag,
+        related_name="uuid_tagged_items",
+        on_delete=models.CASCADE
+    )
+    object_id = models.CharField(max_length=36, db_index=True)
+
+    class Meta:
+        verbose_name = "Tagged Item"
+        verbose_name_plural = "Tagged Items"
+
+
+# Custom TaggableManager để luôn trỏ qua UUIDTaggedItem
+class UUIDTaggableManager(TaggableManager):
+    def __init__(self, **kwargs):
+        kwargs["through"] = kwargs.get("through", UUIDTaggedItem)
+        super().__init__(**kwargs)
+        
 # Create your models here.
 def user_directory_path(instance, filename):
     return 'user_{0}/{1}'.format(instance.user.id, filename)
@@ -341,6 +363,8 @@ class Product(models.Model):
     date = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
     rating_avg = models.FloatField(default=0.0)
+    
+    tags = UUIDTaggableManager(blank=True)
 
     def __repr__(self):
         return f"{self.title} (ID: {self.pid})"
@@ -399,8 +423,6 @@ class Product(models.Model):
             object_id=self.pid,
             is_primary=False
         )
-
-
 
 
 class ProductReview(models.Model):

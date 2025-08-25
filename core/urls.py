@@ -43,4 +43,8 @@ urlpatterns = [
     path("dashboard/", customer_dashboard, name="dashboard"),
     path("make-default-address/", make_address_default, name="make-default-address"),
     path("filter-products/", filter_product, name="filter-product"),
+    
+    #Tags
+    path("products/tag/<slug:tag_slug>/", tag_list, name="tags")
 ]
+
