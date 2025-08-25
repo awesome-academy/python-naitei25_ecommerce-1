@@ -43,4 +43,10 @@ urlpatterns = [
     path("dashboard/", customer_dashboard, name="dashboard"),
     path("make-default-address/", make_address_default, name="make-default-address"),
     path("filter-products/", filter_product, name="filter-product"),
+    path("wishlist/", wishlist_view, name="wishlist"),
+    path("add-to-wishlist/", add_to_wishlist, name="add-to-wishlist"),
+    path("api/wishlist-pids/", wishlist_pids, name="wishlist-pids"),
+    path("remove-from-wishlist/", remove_wishlist, name="remove-from-wishlist"),
+
+
 ]

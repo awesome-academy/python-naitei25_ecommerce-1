@@ -64,7 +64,6 @@
                                                     <input class="form-control mb-2" type="text"
                                                         value="{% trans 'Name —' %} {{ user_profile.full_name|default_if_none:'None'|default:'None' }}"
                                                         readonly tabindex="-1">
-
                                                     <input class="form-control mb-2" type="text"
                                                         value="{% trans 'Bio —' %} {{ user_profile.bio|default_if_none:'None'|default:'None' }}"
                                                         readonly tabindex="-1">
@@ -297,13 +296,44 @@
                 </div>
             </div>
         </div>
+<<<<<<< HEAD
     </main>
 <div id="js-context"
      data-make-default-url="{% url 'core:make-default-address' %}"></div>
 {% endblock content %}
+=======
+<<<<<<< Updated upstream
+<<<<<<< Updated upstream
+    </div>
+</section>
+
+<script src="{% static 'core/js/transaction.js' %}"></script>
+
+{% endblock content %}
+=======
+    </main>
+<div id="js-context"
+     data-make-default-url="{% url 'core:make-default-address' %}"></div>
+{% endblock content %}
+=======
+    </main>
+<div id="js-context"
+     data-make-default-url="{% url 'core:make-default-address' %}"></div>
+{% endblock content %}
+>>>>>>> Stashed changes
+>>>>>>> 953b24a (Vanh/Wishlist)
 
 {% block extra_js %}
   {# CHỈ include file JS tĩnh #}
   <script src="{% static 'assets/js/function.js' %}"></script>
   <script src="{% static 'assets/js/dashboard.js' %}"></script>
+<<<<<<< HEAD
 {% endblock %}
+=======
+<<<<<<< Updated upstream
+{% endblock %}
+>>>>>>> Stashed changes
+=======
+{% endblock %}
+>>>>>>> Stashed changes
+>>>>>>> 953b24a (Vanh/Wishlist)

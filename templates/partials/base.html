@@ -17,8 +17,11 @@
     <!-- Template CSS -->
     <link rel="stylesheet" href="{% static 'assets/css/plugins/slider-range.css' %}" />
     <link rel="stylesheet" href="{% static 'assets/css/main.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/custom.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}">
+
     <link rel="stylesheet" href="{% static 'assets/css/custom.css' %}?v=1">   
-    <link rel="stylesheet" href="{% static 'assets/css/profile.css' %}?v=1">   
+    <link rel="stylesheet" href="{% static 'assets/css/profile.css' %}?v=1">    
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
@@ -44,9 +47,9 @@
                         <div class="header-info">
                             <ul>
                                 <li><span>{% trans "About Us" %}</span></li>
-                                <li><span>{% trans "My Account" %}</span></li>
-                                <li><span>{% trans "Wishlist" %}</span></li>
-                                <li><span>{% trans "Order Tracking" %}</span></li>
+                                <li><a href="{% url 'core:dashboard' %}">My Account</a></li>
+                                <li><a href="{% url 'core:wishlist' %}">Wishlist</a></li>
+                                <li><a href="{% url 'core:dashboard' %}">Order Tracking</a></li>
                             </ul>
                         </div>
                     </div>
@@ -124,11 +127,15 @@
                         <div class="header-action-right">
                             <div class="header-action-2">
                                 <div class="header-action-icon-2">
-                                    <span>
-                                        <img class="svgInject" alt="E-commerce" src="{% static 'assets/imgs/theme/icons/icon-heart.svg' %}" />
-                                        <span class="pro-count blue">0</span>
-                                    </span>
-                                    <span><span class="lable">{% trans "Wishlist" %}</span></span>
+                                    <a href="{% url 'core:wishlist' %}">
+                                        <img class="svgInject" alt="Nest" src="{% static 'assets/imgs/theme/icons/icon-heart.svg' %}" />
+                                        {% if request.user.is_authenticated %}
+                                        <span class="pro-count blue cart-items-count">{{ wishlist_count }}</span>
+                                        {% else %}
+                                        <span class="pro-count blue cart-items-count">0</span>
+                                        {% endif %}
+                                    </a>
+                                    <a href="{% url 'core:wishlist' %}"><span class="lable">{% trans "Wishlist" %}</span></a>
                                 </div>
                                 <div class="header-action-icon-2">
                                   <a class="mini-cart-icon" href="{% url 'core:cart' %}">
@@ -155,7 +162,7 @@
                                         <ul>
                                             <li><a href="{% url 'core:dashboard' %}"><i class="fi fi-rs-user mr-10"></i>{% trans "My Account" %}</a></li>
                                             <li><a href="{% url 'useradmin:dashboard' %}"><i class="fi fi-rs-user mr-10"></i>{% trans "Admin Dashboard" %}</a></li>
-                                            <li><span><i class="fi fi-rs-heart mr-10"></i>{% trans "My Wishlist" %}</span></li>
+                                            <li><a href="{% url 'core:wishlist' %}"><i class="fi fi-rs-heart mr-10"></i>{% trans "My Wishlist" %}</a></li>
                                             <li><span><i class="fi fi-rs-settings-sliders mr-10"></i>{% trans "Setting" %}</span></li>
 
                                             {% if request.user.is_authenticated %}
