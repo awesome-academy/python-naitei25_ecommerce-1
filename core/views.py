@@ -48,6 +48,8 @@ from utils.params import to_decimal, getlist
 from typing import Optional, Tuple
 from django.http import HttpRequest
 from dataclasses import dataclass
+from core.forms import *
+
 def index(request):
     # Base query: các sản phẩm đã publish
     base_query = Product.objects.filter(product_status=C.STATUS_PUBLISHED).order_by("-pid")
@@ -922,3 +924,18 @@ def filter_product(request):
         "has_next": page_obj.has_next(),
         "next_page": page_obj.next_page_number() if page_obj.has_next() else None,
     })
+    
+def tag_list(request, tag_slug=None):
+    products = Product.objects.filter(product_status=PRODUCT_STATUS_PUBLISHED).order_by("-pid")
+    
+    tag = None
+    if tag_slug:
+        tag = get_object_or_404(Tag, slug=tag_slug)
+        products = products.filter(tags__in=[tag])
+    
+    context = {
+        "products": products,
+        "tag": tag,
+    }
+    
+    return render(request, "core/tag.html", context)

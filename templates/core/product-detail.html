@@ -106,15 +106,17 @@
                                                 </div>
                                             </div>
                                             <div class="font-xs">
-                                                <ul class="mr-50 float-start">
-                                                    <li class="mb-5">Type: <span class="text-brand">{{p.type}}</span></li>
-                                                    <li class="mb-5">MFG:<span class="text-brand"> {{p.mfd|date:"d M, Y"}}</span></li>
+                                                <ul class="mr-50 float-start">{% trans "" %}
+                                                    <li class="mb-5">{% trans "Type:" %} <span class="text-brand">{{p.type}}</span></li>
+                                                    <li class="mb-5">{% trans "MFG:" %}<span class="text-brand"> {{p.mfd|date:"d M, Y"}}</span></li>
                                                     <li>LIFE: <span class="text-brand">{{p.life}}</span></li>
                                                 </ul>
                                                 <ul class="float-start">
                                                     <li class="mb-5">SKU: <a href="#">{{p.sku}}</a></li>
-                                                    <li class="mb-5">Tags: <a href="#" rel="tag">Snack</a>, <a href="#" rel="tag">Organic</a>, <a href="#" rel="tag">Brown</a></li>
-                                                    <li>Stock:<span class="in-stock text-brand ml-5">{{p.stock_count}}</span></li>
+                                                    {% if p.tags %}
+                                                    <li class="mb-5">{% trans "Tags:" %}{% for tag in p.tags.all %}<a href="{% url 'core:tags' tag.slug %}" rel="tag"> {{tag.name}}</a>,{% endfor %} </li>
+                                                    {% endif %}
+                                                    <li>{% trans "Stock:" %}<span class="in-stock text-brand ml-5">{{p.stock_count}}</span></li>
                                                 </ul>
                                             </div>
                                         </div>
