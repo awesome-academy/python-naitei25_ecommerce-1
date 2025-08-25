@@ -1,66 +1,147 @@
 {% extends 'useradmin/base.html' %}
 {% load static %}
 {% load humanize %}
+{% load i18n %}
 {% block content %}
 
 <section class="content-main">
     <div class="content-header">
         <div>
-            <h2 class="content-title card-title">Products List</h2>
-            <p>Manage all your products from here</p>
+            <h2 class="content-title card-title">{% trans "Products List" %}</h2>
+            <p>{% trans "Manage all your products from here" %}</p>
         </div>
         <div>
-            <a href="#" class="btn btn-primary btn-sm rounded">Create Product</a>
+            <a href="{% url 'useradmin:dashboard-add-products' %}" class="btn btn-primary">
+                <i class="material-icons md-plus"></i> {% trans "Add Product" %}
+            </a>
         </div>
     </div>
+    
+    <!-- Show/Hide Deleted Toggle -->
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    {% if show_deleted %}
+                        <span class="text-muted">{% trans "Showing all products (including deleted)" %}</span>
+                    {% else %}
+                        <span class="text-muted">{% trans "Showing active products only" %}</span>
+                    {% endif %}
+                </div>
+                <div>
+                    {% if show_deleted %}
+                        <a href="?show_deleted=false" class="btn btn-outline-secondary btn-sm toggle-view-btn">
+                            <i class="material-icons md-visibility_off"></i> {% trans "Hide Deleted" %}
+                        </a>
+                    {% else %}
+                        <a href="?show_deleted=true" class="btn btn-outline-info btn-sm toggle-view-btn">
+                            <i class="material-icons md-visibility"></i> {% trans "Show Deleted" %}
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card mb-4">
         <header class="card-header">
             <div class="row align-items-center">
                 <div class="col-md-6">
-                    Products
+                    {% trans "Products" %}
                 </div>
                 <div class="col-md-6 text-end">
-                    <a href="?sort=title&order={% if sort_by == 'title' and order == 'asc' %}desc{% else %}asc{% endif %}" class="btn btn-light">
-                        Title {% if sort_by == 'title' %}{% if order == 'asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
+                    <a href="?sort=title&order={% if sort_by == 'title' and order == 'asc' %}desc{% else %}asc{% endif %}{% if show_deleted %}&show_deleted=true{% endif %}" class="btn btn-light sort-btn">
+                        {% trans "Title" %} {% if sort_by == 'title' %}{% if order == 'asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
                     </a>
-                    <a href="?sort=amount&order={% if sort_by == 'amount' and order == 'asc' %}desc{% else %}asc{% endif %}" class="btn btn-light">
-                        Price {% if sort_by == 'amount' %}{% if order == 'asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
+                    <a href="?sort=amount&order={% if sort_by == 'amount' and order == 'asc' %}desc{% else %}asc{% endif %}{% if show_deleted %}&show_deleted=true{% endif %}" class="btn btn-light sort-btn">
+                        {% trans "Price" %} {% if sort_by == 'amount' %}{% if order == 'asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
                     </a>
-                    <a href="?sort=date&order={% if sort_by == 'date' and order == 'asc' %}desc{% else %}asc{% endif %}" class="btn btn-light">
-                        Date {% if sort_by == 'date' %}{% if order == 'asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
+                    <a href="?sort=date&order={% if sort_by == 'date' and order == 'asc' %}desc{% else %}asc{% endif %}{% if show_deleted %}&show_deleted=true{% endif %}" class="btn btn-light sort-btn">
+                        {% trans "Date" %} {% if sort_by == 'date' %}{% if order == 'asc' %}&uarr;{% else %}&darr;{% endif %}{% endif %}
                     </a>
                 </div>
             </div>
         </header>
         <div class="card-body">
             {% for p in all_products %}
-            <article class="itemlist">
+            <article class="itemlist {% if p.product_status == PRODUCT_STATUS_DELETED %}bg-light{% endif %}">
                 <div class="row align-items-center">
                     <div class="col-lg-4 col-sm-4 col-8 flex-grow-1 col-name">
-                        <a class="itemside" href="{% url 'core:product-detail' p.pid %}">
+                        <a class="itemside product-link" href="{% url 'core:product-detail' p.pid %}">
                             <div class="left">
                                 <img src="{{p.primary_image_url}}" 
                                      class="img-sm" 
                                      alt="{{p.title}}" />
                             </div>
                             <div class="info">
-                                <h6 class="mb-0">{{p.title}}</h6>
+                                <h6 class="mb-0 {% if p.product_status == PRODUCT_STATUS_DELETED %}text-muted text-decoration-line-through{% endif %}">
+                                    {{p.title}}
+                                </h6>
                             </div>
                         </a>
                     </div>
-                    <div class="col-lg-2 col-sm-2 col-4 col-price"><span>${{p.amount|floatformat:2}}</span></div>
-                    <div class="col-lg-2 col-sm-2 col-4 col-status"><span class="badge  alert-dark">{{p.product_status|title}}</span></div>
-                    <div class="col-lg-1 col-sm-2 col-4 col-date"><span>{{p.date}}</span></div>
+                    <div class="col-lg-2 col-sm-2 col-4 col-price">
+                        <span class="{% if p.product_status == PRODUCT_STATUS_DELETED %}text-muted{% endif %}">
+                            ${{p.amount|floatformat:2}}
+                        </span>
+                    </div>
+                    <div class="col-lg-2 col-sm-2 col-4 col-status">
+                        <span class="badge {% if p.product_status == PRODUCT_STATUS_PUBLISHED %}alert-success{% elif p.product_status == PRODUCT_STATUS_DRAFT %}alert-secondary{% elif p.product_status == PRODUCT_STATUS_DELETED %}alert-danger{% else %}alert-warning{% endif %}">
+                            {{p.product_status|title}}
+                        </span>
+                    </div>
+                    <div class="col-lg-1 col-sm-2 col-4 col-date">
+                        <span class="{% if p.product_status == PRODUCT_STATUS_DELETED %}text-muted{% endif %}">
+                            {{p.date}}
+                        </span>
+                    </div>
                     <div class="col-lg-2 col-sm-2 col-4 col-action text-end">
-                        <a href="{% url 'useradmin:dashboard-edit-products'  p.pid %}" class="btn btn-sm font-sm rounded btn-brand"> <i class="material-icons md-edit"></i> Edit </a>
-                        <a href="{% url 'useradmin:dashboard-delete-products' p.pid  %}" class="btn btn-sm font-sm btn-light rounded"> <i class="material-icons md-delete_forever"></i> Delete </a>
+                        {% if p.product_status == PRODUCT_STATUS_DELETED %}
+                            <!-- Show restore button for deleted products -->
+                            <a href="{% url 'useradmin:dashboard-restore-products' p.pid %}" 
+                               class="btn btn-sm font-sm rounded btn-success restore-btn"
+                               title="{% trans 'Restore Product' %}"
+                               data-product-title="{{p.title}}">
+                                <i class="material-icons md-restore"></i> {% trans "Restore" %}
+                            </a>
+                        {% else %}
+                            <!-- Show edit and delete for active products -->
+                            <a href="{% url 'useradmin:dashboard-edit-products' p.pid %}" 
+                               class="btn btn-sm font-sm rounded btn-brand edit-btn"> 
+                                <i class="material-icons md-edit"></i> {% trans "Edit" %}
+                            </a>
+                            <a href="{% url 'useradmin:dashboard-delete-products' p.pid %}" 
+                               class="btn btn-sm font-sm btn-light rounded delete-btn"
+                               data-product-title="{{p.title}}"> 
+                                <i class="material-icons md-delete_forever"></i> {% trans "Delete" %}
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
             </article>
             {% endfor %}
+            
+            {% if not all_products %}
+            <div class="text-center py-4">
+                <div class="text-muted">
+                    <i class="material-icons md-inbox" style="font-size: 48px; opacity: 0.5;"></i>
+                    <p class="mt-2">
+                        {% if show_deleted %}
+                            {% trans "No products found" %}
+                        {% else %}
+                            {% trans "No active products found." %} <a href="?show_deleted=true" class="toggle-view-btn">{% trans "Show deleted products" %}</a>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            {% endif %}
         </div>
     </div>
-    
 </section>
 
 {% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'js/products-page.js' %}"></script>
+<script src="{% static 'js/products-list.js' %}"></script>
+{% endblock %}

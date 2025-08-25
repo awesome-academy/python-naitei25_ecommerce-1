@@ -50,6 +50,7 @@ PRODUCT_STATUS_CHOICES = (
     ('draft', 'Draft'),
     ('in_review', 'In Review'),
     ('published', 'Published'),
+    ('deleted', 'Deleted'),
 )
 
 OBJECT_TYPE_CHOICES = (
@@ -101,5 +102,11 @@ TAG_LIMIT = 6
 DEFAULT_CATEGORY_IMAGE = "https://hoseiki.vn/wp-content/uploads/2025/03/avatar-mac-dinh-4.jpg"
 DEFAULT_PRODUCT_IMAGE = '/static/images/default-product.png'
 PRODUCT_STATUS_PUBLISHED = "published"
+PRODUCT_STATUS_DRAFT = "draft"
+PRODUCT_STATUS_DISABLED = "disabled"
+PRODUCT_STATUS_REJECTED = "rejected"
+PRODUCT_STATUS_IN_REVIEW = "in_review"
+PRODUCT_STATUS_PUBLISHED = "published"
+PRODUCT_STATUS_DELETED = "deleted"
 PRODUCTS_PER_PAGE = 15
 DEFAULT_PAGE= 1
