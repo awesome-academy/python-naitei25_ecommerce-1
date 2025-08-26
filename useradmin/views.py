@@ -176,7 +176,13 @@ def add_product(request, vendor):
                     success_message = f"Product '{product.title}' saved as draft"
                 
                 product.save()
-
+                
+                # --- xử lý tags ---
+                tags_str = form.cleaned_data.get("tags", "")
+                if tags_str:
+                    tags_list = [t.strip() for t in tags_str.split(",") if t.strip()]
+                    product.tags.set(tags_list)
+                    
                 # Xử lý upload ảnh
                 if 'image' in request.FILES:
                     Image.objects.create(
