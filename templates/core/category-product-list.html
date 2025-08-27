@@ -42,7 +42,7 @@
                                         <img class="hover-img product-thumbnail" src="{{ p.primary_image_url }}" alt="{{ p.alt_text }}">                                    </a>
                                 </div>
                                 <div class="product-action-1">
-                                    <a aria-label="{% trans 'Add To Wishlist' %}" class="action-btn add-to-wishlist" data-product-item="{{ p.id }}"><i class="fi-rs-heart"></i></a>
+                                    <a aria-label="{% trans 'Add To Wishlist' %}" class="action-btn add-to-wishlist" data-product-item="{{ p.pid }}"><i class="fi-rs-heart"></i></a>
                                     <a href="{% url 'core:product-detail' p.pid %}" class="action-btn"><i class="fi-rs-eye"></i></a>
                                 </div>
                                 <div class="product-badges product-badges-position product-badges-mrg">
@@ -81,7 +81,7 @@
                                             <button class="add add-to-cart-btn no-border-btn" data-index="{{ p.id }}" id="add-to-cart-btn">
                                                 <i class="fi-rs-shopping-cart mr-5"></i>{% trans "Add" %}
                                             </button>
-                                            <button class="no-border-btn add-to-wishlist" data-product-item="{{ p.id }}">
+                                            <button class="no-border-btn add-to-wishlist" data-product-item="{{ p.pid }}">
                                                 <i class="fi-rs-heart heart-icon-colored"></i>
                                             </button>
                                         </div>

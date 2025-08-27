@@ -10,3 +10,9 @@ def default(request):
         'vendors': vendors,
         'min_max_price': min_max_price,
     }
+def wishlist_count(request):
+    if request.user.is_authenticated:
+        count = wishlist_model.objects.filter(user=request.user).count()
+    else:
+        count = 0
+    return {"wishlist_count": count}
