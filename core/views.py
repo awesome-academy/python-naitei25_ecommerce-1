@@ -51,6 +51,7 @@ from typing import Optional, Tuple
 from django.http import HttpRequest
 from dataclasses import dataclass
 from core.forms import *
+from utils.email_service import *
 
 def index(request):
     # Base query: các sản phẩm đã publish
@@ -770,6 +771,9 @@ def cod_checkout(request):
     order.order_status = 'shipped'   # <-- theo yêu cầu
     order.save(update_fields=["amount", "paid_status", "order_status"])
 
+    #Gửi email thông báo đặt hàng thành công
+    send_order_email(request.user, order)
+    
     # Xoá giỏ + dấu băng nếu có
     request.session['cart_data_obj'] = {}
     request.session.pop('frozen_order_id', None)

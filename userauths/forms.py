@@ -42,3 +42,6 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ["full_name", "image", "bio", "phone"]
+        
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField(widget=forms.EmailInput(attrs={"placeholder": _("Your email")}))
